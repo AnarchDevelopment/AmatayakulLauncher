@@ -15,9 +15,6 @@ mara.exe Minecraft.Win10.DX11.exe {APPDATA USUARIO}\roaming\amatayakul.dll
 
 
 ## Previa
-1.
-<img width="1129" height="755" alt="image" src="https://github.com/user-attachments/assets/d0d9f231-830d-4ca2-8956-fe9775ae5d02" />
 
-2.
 <img width="1127" height="755" alt="image" src="https://github.com/user-attachments/assets/9e7968ed-513c-4872-93dd-ead2dd49ac92" />
 
