@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showStatus('', 'success');
                 return true;
             } else {
-                versionText.textContent = `Minecraft ${version} - Update Required`;
+                versionText.textContent = `Minecraft ${version} - Unsupported version!`;
                 statusDot.className = 'status-dot invalid';
                 isValidVersion = false;
                 btnLaunch.disabled = true;
