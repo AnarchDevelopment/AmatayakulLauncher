@@ -1,14 +1,14 @@
 ## Amatayakul Launcher
 
-Un launcher para https://github.com/Aztral-Network/amatayakul-client
+Un launcher para https://github.com/AnarchDevelopment/amatayakul-client
 
 ## Que hace al lanzar
 
 Descarga ~
 
-https://github.com/Aztral-Network/amatayakul-client (amatayakul.dll)
+https://github.com/AnarchDevelopment/amatayakul-client (amatayakul.dll)
 
-https://github.com/Aztral-Network/MaraInjector (mara.exe)
+https://github.com/AnarchDevelopment/MaraInjector (mara.exe)
 
 Ejecuta ~
 

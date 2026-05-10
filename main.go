@@ -116,7 +116,7 @@ func (a *App) PerformInjection(customDll string) map[string]interface{} {
 
 	// 1. Check and download mara.exe if missing
 	if _, err := os.Stat(maraPath); os.IsNotExist(err) {
-		err := downloadGitHubReleaseAsset("Aztral-Network/MaraInjector", maraPath)
+		err := downloadGitHubReleaseAsset("AnarchDevelopment/MaraInjector", maraPath)
 		if err != nil {
 			return map[string]interface{}{"success": false, "error": "Failed to download mara injector: " + err.Error()}
 		}
@@ -126,7 +126,7 @@ func (a *App) PerformInjection(customDll string) map[string]interface{} {
 	if customDll == "" || customDll == "Default Amatayakul DLL" {
 		dllPath = filepath.Join(launcherDir, "amatayakul.dll")
 		if _, err := os.Stat(dllPath); os.IsNotExist(err) {
-			err := downloadGitHubReleaseAsset("Aztral-Network/AmatayakulDLL", dllPath)
+			err := downloadGitHubReleaseAsset("AnarchDevelopment/AmatayakulDLL", dllPath)
 			if err != nil {
 				return map[string]interface{}{"success": false, "error": "Failed to download default DLL: " + err.Error()}
 			}
