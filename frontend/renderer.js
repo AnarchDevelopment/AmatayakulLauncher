@@ -141,6 +141,44 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Settings Logic
+    const savedDll = localStorage.getItem('amatayakul_custom_dll');
+    if (savedDll) {
+        customDllPath.value = savedDll;
+    }
+
+    if (btnBrowse) {
+        btnBrowse.addEventListener('click', async () => {
+            try {
+                const filepath = await window.go.main.App.SelectDLL();
+                if (filepath) {
+                    customDllPath.value = filepath;
+                }
+            } catch (e) {
+                console.error("Failed to select DLL:", e);
+            }
+        });
+    }
+
+    if (btnSaveSettings) {
+        btnSaveSettings.addEventListener('click', () => {
+            const val = customDllPath.value.trim();
+            if (val) {
+                localStorage.setItem('amatayakul_custom_dll', val);
+            } else {
+                localStorage.removeItem('amatayakul_custom_dll');
+            }
+            closeSettingsModal();
+        });
+    }
+
+    if (btnResetSettings) {
+        btnResetSettings.addEventListener('click', () => {
+            customDllPath.value = '';
+            localStorage.removeItem('amatayakul_custom_dll');
+        });
+    }
+
     // Cinematic Disturbance Effect
     setInterval(() => {
         if (Math.random() > 0.96) {

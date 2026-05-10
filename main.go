@@ -47,6 +47,22 @@ func (a *App) GetMinecraftVersion() string {
 	return strings.TrimSpace(string(out))
 }
 
+func (a *App) SelectDLL() string {
+	filepath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Select Custom DLL",
+		Filters: []runtime.FileFilter{
+			{
+				DisplayName: "DLL Files (*.dll)",
+				Pattern:     "*.dll",
+			},
+		},
+	})
+	if err != nil {
+		return ""
+	}
+	return filepath
+}
+
 type GitHubRelease struct {
 	Assets []struct {
 		BrowserDownloadURL string `json:"browser_download_url"`
