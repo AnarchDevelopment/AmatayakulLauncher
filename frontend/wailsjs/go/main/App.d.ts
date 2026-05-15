@@ -11,7 +11,7 @@ export function IsMinecraftRunning():Promise<boolean>;
 
 export function KillMinecraft():Promise<{[key: string]: any}>;
 
-export function PerformInjection(arg1:string,arg2:boolean):Promise<{[key: string]: any}>;
+export function PerformInjection(arg1:string,arg2:boolean,arg3:boolean,arg4:boolean):Promise<{[key: string]: any}>;
 
 export function SelectDLL():Promise<string>;
 

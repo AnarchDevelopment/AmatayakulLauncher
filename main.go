@@ -438,7 +438,7 @@ func isNewerVersion(current, remote string) bool {
 
 // PerformInjection downloads mara + DLL if needed, launches Minecraft, and injects.
 // When skipLaunch=true it skips launching Minecraft (used for "inject anyways").
-func (a *App) PerformInjection(customDll string, skipLaunch bool) map[string]interface{} {
+func (a *App) PerformInjection(customDll string, skipLaunch bool, checkMara bool, checkDll bool) map[string]interface{} {
 	appData := os.Getenv("APPDATA")
 	if appData == "" {
 		return map[string]interface{}{"success": false, "error": "APPDATA not found"}
@@ -452,11 +452,18 @@ func (a *App) PerformInjection(customDll string, skipLaunch bool) map[string]int
 	var dllPath string
 
 	// 1. Check and download mara.exe if missing or update needed
-	if err := a.ensureAssetUpdated("AnarchDevelopment/MaraInjector", maraPath, maraVersionPath); err != nil {
-		runtime.LogErrorf(a.ctx, "Failed to ensure mara injector is updated: %v", err)
-		// Fallback: check if it exists at least
-		if _, errS := os.Stat(maraPath); os.IsNotExist(errS) {
-			return map[string]interface{}{"success": false, "error": "Failed to download mara injector: " + err.Error()}
+	if checkMara {
+		if err := a.ensureAssetUpdated("AnarchDevelopment/MaraInjector", maraPath, maraVersionPath); err != nil {
+			runtime.LogErrorf(a.ctx, "Failed to ensure mara injector is updated: %v", err)
+			// Fallback: check if it exists at least
+			if _, errS := os.Stat(maraPath); os.IsNotExist(errS) {
+				return map[string]interface{}{"success": false, "error": "Failed to download mara injector: " + err.Error()}
+			}
+		}
+	} else {
+		// Just check if it exists
+		if _, err := os.Stat(maraPath); os.IsNotExist(err) {
+			return map[string]interface{}{"success": false, "error": "Mara injector not found and auto-check is disabled"}
 		}
 	}
 
@@ -464,11 +471,19 @@ func (a *App) PerformInjection(customDll string, skipLaunch bool) map[string]int
 	if customDll == "" || customDll == "Default Amatayakul DLL" {
 		dllPath = filepath.Join(launcherDir, "amatayakul.dll")
 		dllVersionPath := filepath.Join(launcherDir, "dll_version.txt")
-		if err := a.ensureAssetUpdated("AnarchDevelopment/AmatayakulDLL", dllPath, dllVersionPath); err != nil {
-			runtime.LogErrorf(a.ctx, "Failed to ensure default DLL is updated: %v", err)
-			// Fallback: check if it exists at least
-			if _, errS := os.Stat(dllPath); os.IsNotExist(errS) {
-				return map[string]interface{}{"success": false, "error": "Failed to download default DLL: " + err.Error()}
+		
+		if checkDll {
+			if err := a.ensureAssetUpdated("AnarchDevelopment/AmatayakulDLL", dllPath, dllVersionPath); err != nil {
+				runtime.LogErrorf(a.ctx, "Failed to ensure default DLL is updated: %v", err)
+				// Fallback: check if it exists at least
+				if _, errS := os.Stat(dllPath); os.IsNotExist(errS) {
+					return map[string]interface{}{"success": false, "error": "Failed to download default DLL: " + err.Error()}
+				}
+			}
+		} else {
+			// Just check if it exists
+			if _, err := os.Stat(dllPath); os.IsNotExist(err) {
+				return map[string]interface{}{"success": false, "error": "Default DLL not found and auto-check is disabled"}
 			}
 		}
 	} else {

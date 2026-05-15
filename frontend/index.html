@@ -124,7 +124,29 @@
                         <input type="text" id="customDllPath" placeholder="Default Amatayakul DLL" readonly>
                         <button class="field-btn" id="btnBrowse">Browse</button>
                     </div>
-                    <p class="field-info">Select a custom DLL to inject into Minecraft.</p>
+                <div class="field field--expandable" id="updateCheckerField">
+                    <div class="field-header" id="btnExpandUpdates">
+                        <label>Update Checker</label>
+                        <svg class="chevron" id="chevronUpdates" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="expand-content" id="updatesContent">
+                        <div class="setting-item">
+                            <span class="setting-label">Check for Mara Injector</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="checkMaraUpdate" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <span class="setting-label">Check for Amatayakul DLL</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="checkDllUpdate" checked>
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="field-info">Toggle automatic updates for core components.</p>
                 </div>
                 <div class="field-actions">
                     <button class="btn-primary" id="btnSaveSettings">Save Changes</button>

@@ -22,8 +22,8 @@ export function KillMinecraft() {
   return window['go']['main']['App']['KillMinecraft']();
 }
 
-export function PerformInjection(arg1, arg2) {
-  return window['go']['main']['App']['PerformInjection'](arg1, arg2);
+export function PerformInjection(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['PerformInjection'](arg1, arg2, arg3, arg4);
 }
 
 export function SelectDLL() {

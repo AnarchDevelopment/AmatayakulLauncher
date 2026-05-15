@@ -39,11 +39,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnInjectAnyways   = document.getElementById('btnInjectAnyways');
     const btnRestartAndInject = document.getElementById('btnRestartAndInject');
     
-    // Update Popup
-    const updateModal        = document.getElementById('updateModal');
-    const btnUpdateNow       = document.getElementById('btnUpdateNow');
-    const btnUpdateLater     = document.getElementById('btnUpdateLater');
     const newVersionTag      = document.getElementById('newVersionTag');
+    
+    // Update checker refs
+    const btnExpandUpdates   = document.getElementById('btnExpandUpdates');
+    const updateCheckerField = document.getElementById('updateCheckerField');
+    const checkMaraUpdate    = document.getElementById('checkMaraUpdate');
+    const checkDllUpdate     = document.getElementById('checkDllUpdate');
 
     // ── State ───────────────────────────────────────────────
     const REQUIRED_VERSION = '0.1510.0.0';
@@ -134,7 +136,12 @@ document.addEventListener('DOMContentLoaded', () => {
             showStatus('Injecting DLL into Minecraft...', 'info');
 
             const dllValue = customDllPath ? customDllPath.value.trim() : '';
-            const result = await window.go.main.App.PerformInjection(dllValue, skipLaunch);
+            const result = await window.go.main.App.PerformInjection(
+                dllValue, 
+                skipLaunch, 
+                checkMaraUpdate.checked, 
+                checkDllUpdate.checked
+            );
 
             if (result.success) {
                 updateProgress(100, 'Injection complete!');
@@ -264,6 +271,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === settingsModal) closeSettingsModal();
     });
 
+    // Expansion logic
+    if (btnExpandUpdates) {
+        btnExpandUpdates.addEventListener('click', () => {
+            updateCheckerField.classList.toggle('field--open');
+        });
+    }
+
     // ── Window Controls ──────────────────────────────────────
     if (btnMinimize) btnMinimize.addEventListener('click', () => window.runtime.WindowMinimize());
     if (btnMaximize) btnMaximize.addEventListener('click', () => {
@@ -294,6 +308,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = customDllPath.value.trim();
             if (val) localStorage.setItem('amatayakul_custom_dll', val);
             else localStorage.removeItem('amatayakul_custom_dll');
+            
+            localStorage.setItem('amatayakul_check_mara', checkMaraUpdate.checked);
+            localStorage.setItem('amatayakul_check_dll', checkDllUpdate.checked);
+            
             closeSettingsModal();
         });
     }
@@ -301,9 +319,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnResetSettings) {
         btnResetSettings.addEventListener('click', () => {
             customDllPath.value = '';
+            checkMaraUpdate.checked = true;
+            checkDllUpdate.checked = true;
             localStorage.removeItem('amatayakul_custom_dll');
+            localStorage.setItem('amatayakul_check_mara', 'true');
+            localStorage.setItem('amatayakul_check_dll', 'true');
         });
     }
+
+    // Load extra settings
+    const savedMaraCheck = localStorage.getItem('amatayakul_check_mara');
+    if (savedMaraCheck !== null && checkMaraUpdate) checkMaraUpdate.checked = savedMaraCheck === 'true';
+    
+    const savedDllCheck = localStorage.getItem('amatayakul_check_dll');
+    if (savedDllCheck !== null && checkDllUpdate) checkDllUpdate.checked = savedDllCheck === 'true';
 
     // ── Cinematic Flicker ────────────────────────────────────
     setInterval(() => {
