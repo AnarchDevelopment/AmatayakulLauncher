@@ -70,6 +70,7 @@
                 </nav>
 
                 <div class="sidebar-bottom">
+                    <div class="launcher-version" id="launcherVersion">v0.0.0</div>
                     <button class="github-link-btn" onclick="window.runtime.BrowserOpenURL('https://github.com/AnarchDevelopment')">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
                         <span>GitHub</span>
@@ -80,9 +81,16 @@
             <main class="main-view">
                 <div class="view-content">
                     <div class="hero-section">
+                        <!-- Launch Button -->
                         <button class="btn-enter" id="btnLaunch" disabled>
                             <span class="enter-text">ENTER</span>
                             <div class="enter-subtext">ASCEND TO AMATAYAKUL</div>
+                        </button>
+
+                        <!-- Kill Button (shown when injected) -->
+                        <button class="btn-kill" id="btnKill" style="display:none;">
+                            <span class="kill-text">KILL</span>
+                            <div class="kill-subtext">TERMINATE MINECRAFT</div>
                         </button>
                     </div>
 
@@ -99,7 +107,7 @@
         </div>
     </div>
 
-    <!-- Improved Modal -->
+    <!-- Settings Modal -->
     <div class="modal-root" id="settingsModal" style="--wails-draggable:no-drag">
         <div class="modal-backdrop"></div>
         <div class="modal-card">
@@ -121,6 +129,57 @@
                 <div class="field-actions">
                     <button class="btn-primary" id="btnSaveSettings">Save Changes</button>
                     <button class="btn-outline" id="btnResetSettings">Reset to Default</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kill Confirmation Dialog -->
+    <div class="modal-root" id="killConfirmModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3>Confirm Kill</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body">Are you sure? Killing the game process can cause <strong>progress loss</strong>.</p>
+                <div class="field-actions">
+                    <button class="btn-danger" id="btnConfirmKill">Kill Game</button>
+                    <button class="btn-outline" id="btnCancelKill">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Detected Popup -->
+    <div class="modal-root" id="gameDetectedModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3>Game Detected</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body">Game process detected and ready to inject. But we recommend you to launch the game via the launcher.</p>
+                <div class="field-actions field-actions--col">
+                    <button class="btn-primary" id="btnRestartAndInject">↺ Restart and inject <span class="tag-recommended">Recommended</span></button>
+                    <button class="btn-outline" id="btnInjectAnyways">Inject anyways</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Available Popup -->
+    <div class="modal-root" id="updateModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3>UPDATE AVAILABLE!</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body">A new version (<strong id="newVersionTag">v0.0.0</strong>) of the launcher is available. Do you want to update now?</p>
+                <div class="field-actions field-actions--col">
+                    <button class="btn-primary" id="btnUpdateNow">Update now</button>
+                    <button class="btn-outline" id="btnUpdateLater">Update later</button>
                 </div>
             </div>
         </div>

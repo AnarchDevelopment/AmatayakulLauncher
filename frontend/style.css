@@ -162,6 +162,17 @@ body {
     box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
 }
 
+.status-dot.running {
+    background: #f59e0b;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+    animation: pulse-amber 1.5s infinite;
+}
+
+@keyframes pulse-amber {
+    0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.4); }
+    50%       { box-shadow: 0 0 18px rgba(245, 158, 11, 0.7); }
+}
+
 .status-text {
     font-size: 12px;
     font-weight: 500;
@@ -207,6 +218,19 @@ body {
 
 .sidebar-bottom {
     margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.launcher-version {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.3);
+    letter-spacing: 1px;
+    padding-left: 12px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 .github-link-btn {
@@ -555,3 +579,111 @@ body {
     20% { opacity: 1; }
 }
 .flicker { animation: flicker 0.1s infinite; }
+
+/* ── Kill Button ─────────────────────────────────────────── */
+.btn-kill {
+    background: transparent;
+    border: 1px solid #8b1e2d;
+    color: var(--text);
+    padding: 24px 80px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    letter-spacing: 8px;
+    cursor: pointer;
+    transition: all 0.5s var(--easing);
+    position: relative;
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0%, 100% { border-color: #8b1e2d; box-shadow: 0 0 0px rgba(139, 30, 45, 0); }
+    50%       { border-color: #c0392b; box-shadow: 0 0 30px rgba(192, 57, 43, 0.4); }
+}
+
+.btn-kill:hover {
+    background: #8b1e2d;
+    box-shadow: 0 0 50px rgba(139, 30, 45, 0.5);
+    transform: scale(1.02);
+}
+
+.kill-text {
+    font-size: 28px;
+    letter-spacing: 8px;
+}
+
+.kill-subtext {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.btn-kill:hover .kill-subtext {
+    opacity: 1;
+}
+
+/* ── Compact Modal ───────────────────────────────────────── */
+.modal-card--compact {
+    max-width: 420px;
+}
+
+.dialog-body {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+}
+
+.dialog-body strong {
+    color: var(--text);
+}
+
+/* ── Danger Button ───────────────────────────────────────── */
+.btn-danger {
+    background: #8b1e2d;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-danger:hover {
+    background: #c0392b;
+}
+
+/* ── Column Actions ──────────────────────────────────────── */
+.field-actions--col {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.field-actions--col button {
+    width: 100%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Recommended Tag ─────────────────────────────────────── */
+.tag-recommended {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    border-radius: 4px;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+}

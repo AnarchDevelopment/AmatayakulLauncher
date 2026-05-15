@@ -2,7 +2,10 @@ module amatayakul-launcher
 
 go 1.21
 
-require github.com/wailsapp/wails/v2 v2.9.2
+require (
+	github.com/wailsapp/wails/v2 v2.9.2
+	github.com/xeyossr/go-discordrpc v1.1.0
+)
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
@@ -32,4 +35,5 @@ require (
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
+	gopkg.in/natefinch/npipe.v2 v2.0.0-20160621034901-c1b8fa8bdcce // indirect
 )

@@ -1,35 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Initial Splash Transition (Fail-safe)
+    // ── Splash ─────────────────────────────────────────────
     const splash = document.getElementById('loadingSplash');
     const hideSplash = () => {
         if (splash && !splash.classList.contains('fade-out')) {
             splash.classList.add('fade-out');
         }
     };
-    setTimeout(hideSplash, 2500); // Fail-safe after 2.5 seconds
+    setTimeout(hideSplash, 2500);
 
-    const btnLaunch = document.getElementById('btnLaunch');
-    const btnSettings = document.getElementById('btnSettings');
-    const btnMinimize = document.getElementById('btnMinimize');
-    const btnMaximize = document.getElementById('btnMaximize');
-    const btnClose = document.getElementById('btnClose');
-    const settingsModal = document.getElementById('settingsModal');
-    const closeSettings = document.getElementById('closeSettings');
-    const btnBrowse = document.getElementById('btnBrowse');
-    const btnSaveSettings = document.getElementById('btnSaveSettings');
-    const btnResetSettings = document.getElementById('btnResetSettings');
-    const customDllPath = document.getElementById('customDllPath');
-    const versionText = document.getElementById('versionText');
-    const statusDot = document.getElementById('statusDot');
-    const progressContainer = document.getElementById('progressContainer');
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    const statusMessage = document.getElementById('statusMessage');
+    // ── Element Refs ────────────────────────────────────────
+    const btnLaunch          = document.getElementById('btnLaunch');
+    const btnKill            = document.getElementById('btnKill');
+    const btnSettings        = document.getElementById('btnSettings');
+    const btnMinimize        = document.getElementById('btnMinimize');
+    const btnMaximize        = document.getElementById('btnMaximize');
+    const btnClose           = document.getElementById('btnClose');
+    const settingsModal      = document.getElementById('settingsModal');
+    const closeSettings      = document.getElementById('closeSettings');
+    const btnBrowse          = document.getElementById('btnBrowse');
+    const btnSaveSettings    = document.getElementById('btnSaveSettings');
+    const btnResetSettings   = document.getElementById('btnResetSettings');
+    const customDllPath      = document.getElementById('customDllPath');
+    const versionText        = document.getElementById('versionText');
+    const statusDot          = document.getElementById('statusDot');
+    const progressContainer  = document.getElementById('progressContainer');
+    const progressFill       = document.getElementById('progressFill');
+    const progressText       = document.getElementById('progressText');
+    const statusMessage      = document.getElementById('statusMessage');
+    const launcherVersion    = document.getElementById('launcherVersion');
 
+    // Kill confirm
+    const killConfirmModal   = document.getElementById('killConfirmModal');
+    const btnConfirmKill     = document.getElementById('btnConfirmKill');
+    const btnCancelKill      = document.getElementById('btnCancelKill');
+
+    // Game detected popup
+    const gameDetectedModal  = document.getElementById('gameDetectedModal');
+    const btnInjectAnyways   = document.getElementById('btnInjectAnyways');
+    const btnRestartAndInject = document.getElementById('btnRestartAndInject');
+    
+    // Update Popup
+    const updateModal        = document.getElementById('updateModal');
+    const btnUpdateNow       = document.getElementById('btnUpdateNow');
+    const btnUpdateLater     = document.getElementById('btnUpdateLater');
+    const newVersionTag      = document.getElementById('newVersionTag');
+
+    // ── State ───────────────────────────────────────────────
     const REQUIRED_VERSION = '0.1510.0.0';
-    let isValidVersion = false;
-    let isLaunching = false;
+    let isValidVersion  = false;
+    let isLaunching     = false;
+    let isInjected      = false;   // true once we've successfully injected this session
 
+    // ── Helpers ─────────────────────────────────────────────
     function showStatus(message, type = 'info') {
         statusMessage.textContent = message;
         statusMessage.className = `status-message ${type}`;
@@ -45,11 +67,31 @@ document.addEventListener('DOMContentLoaded', () => {
         progressContainer.style.display = 'none';
     }
 
+    /** Switch UI to "Running" (injected) mode */
+    function setInjectedMode() {
+        isInjected = true;
+        btnLaunch.style.display = 'none';
+        btnKill.style.display   = 'flex';
+        showStatus('Running!', 'success');
+        statusDot.className = 'status-dot running';
+    }
+
+    /** Switch UI back to "Ready" mode */
+    function setReadyMode() {
+        isInjected = false;
+        btnLaunch.style.display = 'flex';
+        btnKill.style.display   = 'none';
+        if (isValidVersion) {
+            showStatus('Ready to launch', 'success');
+            statusDot.className = 'status-dot valid';
+            btnLaunch.disabled  = false;
+        }
+    }
+
+    // ── Version Check ────────────────────────────────────────
     async function checkMinecraftVersion() {
         try {
-            console.log("Checking version...");
             const version = await window.go.main.App.GetMinecraftVersion();
-            
             if (!version) {
                 versionText.textContent = 'Minecraft UWP not found';
                 statusDot.className = 'status-dot invalid';
@@ -58,13 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 showStatus('Minecraft UWP is not installed', 'error');
                 return false;
             }
-
             if (version.includes(REQUIRED_VERSION)) {
-                versionText.textContent = `Minecraft 0.15.10 - Ready`;
+                versionText.textContent = 'Minecraft 0.15.10 - Ready';
                 statusDot.className = 'status-dot valid';
                 isValidVersion = true;
                 btnLaunch.disabled = false;
-                showStatus('', 'success');
+                showStatus('Ready to launch', 'success');
                 return true;
             } else {
                 versionText.textContent = `Minecraft ${version} - Unsupported version!`;
@@ -74,16 +115,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 showStatus(`Required version: ${REQUIRED_VERSION}`, 'error');
                 return false;
             }
-        } catch(e) {
-            console.error("Init Error:", e);
-            versionText.textContent = "Minecraft not detected (Bridge Error)";
+        } catch (e) {
+            console.error('Init Error:', e);
+            versionText.textContent = 'Minecraft not detected (Bridge Error)';
             statusDot.className = 'status-dot invalid';
             return false;
         }
     }
 
-    async function launchGame() {
-        if (isLaunching || !isValidVersion) return;
+    // ── Injection ────────────────────────────────────────────
+    async function performInject(skipLaunch = false) {
+        if (isLaunching) return;
         isLaunching = true;
         btnLaunch.disabled = true;
 
@@ -91,71 +133,158 @@ document.addEventListener('DOMContentLoaded', () => {
             updateProgress(40, 'Preparing Injection...');
             showStatus('Injecting DLL into Minecraft...', 'info');
 
-            const dllValue = customDllPath ? customDllPath.value.trim() : "";
-            const result = await window.go.main.App.PerformInjection(dllValue);
-            
+            const dllValue = customDllPath ? customDllPath.value.trim() : '';
+            const result = await window.go.main.App.PerformInjection(dllValue, skipLaunch);
+
             if (result.success) {
                 updateProgress(100, 'Injection complete!');
-                showStatus('Successfully injected! Enjoy Amatayakul!', 'success');
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                hideProgress();
+                setInjectedMode();
+                // Tell Go to set RPC to in-game
+                window.go.main.App.SetRPCIngame();
             } else {
                 throw new Error(result.error || 'Injection failed');
             }
         } catch (error) {
             showStatus(`Error: ${error.message}`, 'error');
+            hideProgress();
+            btnLaunch.disabled = !isValidVersion;
         } finally {
+            isLaunching = false;
+        }
+    }
+
+    // ── Launch Button ────────────────────────────────────────
+    btnLaunch.addEventListener('click', async () => {
+        if (isLaunching || !isValidVersion) return;
+
+        // Check if game is already running
+        const running = await window.go.main.App.IsMinecraftRunning();
+        if (running && !isInjected) {
+            // Show "game detected" popup
+            openModal(gameDetectedModal);
+        } else {
+            await performInject(false);
+        }
+    });
+
+    // ── Kill Button ──────────────────────────────────────────
+    btnKill.addEventListener('click', () => {
+        openModal(killConfirmModal);
+    });
+
+    btnConfirmKill.addEventListener('click', async () => {
+        closeModal(killConfirmModal);
+        const result = await window.go.main.App.KillMinecraft();
+        if (!result.success) {
+            showStatus('Failed to kill Minecraft: ' + result.error, 'error');
+        }
+        // setReadyMode will be called naturally by the process watcher event
+    });
+
+    btnCancelKill.addEventListener('click', () => closeModal(killConfirmModal));
+
+    // ── Game-Detected Popup ──────────────────────────────────
+    btnInjectAnyways.addEventListener('click', async () => {
+        closeModal(gameDetectedModal);
+        await performInject(true /* skipLaunch */);
+    });
+
+    btnRestartAndInject.addEventListener('click', async () => {
+        closeModal(gameDetectedModal);
+        if (isLaunching) return;
+        isLaunching = true;
+        btnLaunch.disabled = true;
+
+        try {
+            updateProgress(20, 'Killing existing process...');
+            showStatus('Restarting Minecraft...', 'info');
+            await window.go.main.App.KillMinecraft();
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            updateProgress(50, 'Relaunching Minecraft...');
+            isLaunching = false;
+            await performInject(false /* launch fresh */);
+        } catch (e) {
+            showStatus(`Error: ${e.message}`, 'error');
             hideProgress();
             isLaunching = false;
             btnLaunch.disabled = !isValidVersion;
         }
+    });
+
+    // ── Process Watcher (events from Go) ─────────────────────
+    // Go emits "minecraft:running" every second
+    window.runtime.EventsOn('minecraft:running', (running) => {
+        if (running) {
+            if (!isInjected) {
+                // Process is running but we haven't injected yet — keep launch available
+            }
+            // If we ARE injected, keep kill button visible (already set by setInjectedMode)
+        } else {
+            // Process gone
+            if (isInjected) {
+                setReadyMode();
+                window.go.main.App.SetRPCLauncher();
+            }
+        }
+    });
+
+    // ── Update Logic ─────────────────────────────────────────
+    window.runtime.EventsOn('update:available', (version) => {
+        if (newVersionTag) newVersionTag.textContent = `v${version}`;
+        openModal(updateModal);
+    });
+
+    if (btnUpdateNow) {
+        btnUpdateNow.addEventListener('click', () => {
+            closeModal(updateModal);
+            showStatus('Update feature coming soon...', 'info');
+            // We will trigger updater.exe here later
+        });
     }
 
-    function openSettings() {
-        settingsModal.classList.add('active');
+    if (btnUpdateLater) {
+        btnUpdateLater.addEventListener('click', () => {
+            closeModal(updateModal);
+        });
     }
 
-    function closeSettingsModal() {
-        settingsModal.classList.remove('active');
-    }
+    // ── Modal Helpers ────────────────────────────────────────
+    function openModal(el) { el.classList.add('active'); }
+    function closeModal(el) { el.classList.remove('active'); }
 
-    btnLaunch.addEventListener('click', launchGame);
+    // Settings
+    function openSettings() { openModal(settingsModal); }
+    function closeSettingsModal() { closeModal(settingsModal); }
+
     btnSettings.addEventListener('click', openSettings);
-    
-    // Wails Window Controls
+    if (closeSettings) closeSettings.addEventListener('click', closeSettingsModal);
+    if (settingsModal) settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) closeSettingsModal();
+    });
+
+    // ── Window Controls ──────────────────────────────────────
     if (btnMinimize) btnMinimize.addEventListener('click', () => window.runtime.WindowMinimize());
     if (btnMaximize) btnMaximize.addEventListener('click', () => {
         window.runtime.WindowIsMaximised().then(isMax => {
-            if (isMax) {
-                window.runtime.WindowUnmaximise();
-            } else {
-                window.runtime.WindowMaximise();
-            }
+            if (isMax) window.runtime.WindowUnmaximise();
+            else window.runtime.WindowMaximise();
         });
     });
     if (btnClose) btnClose.addEventListener('click', () => window.runtime.Quit());
 
-    if (closeSettings) closeSettings.addEventListener('click', closeSettingsModal);
-    if (settingsModal) settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) {
-            closeSettingsModal();
-        }
-    });
-
-    // Settings Logic
+    // ── Settings Persistence ─────────────────────────────────
     const savedDll = localStorage.getItem('amatayakul_custom_dll');
-    if (savedDll) {
-        customDllPath.value = savedDll;
-    }
+    if (savedDll) customDllPath.value = savedDll;
 
     if (btnBrowse) {
         btnBrowse.addEventListener('click', async () => {
             try {
-                const filepath = await window.go.main.App.SelectDLL();
-                if (filepath) {
-                    customDllPath.value = filepath;
-                }
+                const fp = await window.go.main.App.SelectDLL();
+                if (fp) customDllPath.value = fp;
             } catch (e) {
-                console.error("Failed to select DLL:", e);
+                console.error('Failed to select DLL:', e);
             }
         });
     }
@@ -163,11 +292,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnSaveSettings) {
         btnSaveSettings.addEventListener('click', () => {
             const val = customDllPath.value.trim();
-            if (val) {
-                localStorage.setItem('amatayakul_custom_dll', val);
-            } else {
-                localStorage.removeItem('amatayakul_custom_dll');
-            }
+            if (val) localStorage.setItem('amatayakul_custom_dll', val);
+            else localStorage.removeItem('amatayakul_custom_dll');
             closeSettingsModal();
         });
     }
@@ -179,16 +305,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Cinematic Disturbance Effect
+    // ── Cinematic Flicker ────────────────────────────────────
     setInterval(() => {
         if (Math.random() > 0.96) {
-            document.body.classList.add("flicker");
-            setTimeout(() => {
-                document.body.classList.remove("flicker");
-            }, 120);
+            document.body.classList.add('flicker');
+            setTimeout(() => document.body.classList.remove('flicker'), 120);
         }
     }, 2000);
 
-    // Initial Check
-    setTimeout(checkMinecraftVersion, 500);
+    // ── Boot ─────────────────────────────────────────────────
+    async function boot() {
+        try {
+            const ver = await window.go.main.App.GetAppVersion();
+            if (launcherVersion) launcherVersion.textContent = `v${ver}`;
+        } catch (e) {
+            console.error('Failed to get app version:', e);
+        }
+        setTimeout(checkMinecraftVersion, 500);
+    }
+
+    boot();
 });
