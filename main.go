@@ -32,7 +32,7 @@ var assets embed.FS
 // Discord Application ID for Amatayakul Launcher
 const discordAppID = "1503246619368362094"
 
-const appVersion = "1.0.0"
+const appVersion = "1.1.0"
 
 type App struct {
 	ctx          context.Context
