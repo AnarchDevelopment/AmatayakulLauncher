@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"context"
 	"embed"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"image"
+	_ "image/png"
 	"io"
 	"net/http"
 	"os"
@@ -29,8 +32,7 @@ var assets embed.FS
 // Discord Application ID for Amatayakul Launcher
 const discordAppID = "1503246619368362094"
 
-// Current launcher version
-const appVersion = "1.0.2"
+const appVersion = "1.0.0"
 
 type App struct {
 	ctx          context.Context
@@ -39,6 +41,7 @@ type App struct {
 	isInjected   bool               // true after a successful injection, reset when process dies
 	launchTime   time.Time          // when the launcher started (for RPC timestamp)
 	lastPresence string             // "launcher" or "game" to avoid redundant updates
+	cancelInject bool               // Flag to cancel injection during cooldown
 }
 
 func NewApp() *App {
@@ -200,6 +203,24 @@ func (a *App) KillMinecraft() map[string]interface{} {
 	return map[string]interface{}{"success": true}
 }
 
+// LaunchMinecraft starts Minecraft.Win10.DX11.exe via explorer shell
+func (a *App) LaunchMinecraft() map[string]interface{} {
+	launchCmd := exec.Command("explorer.exe", "shell:AppsFolder\\Microsoft.MinecraftUWP_8wekyb3d8bbwe!App")
+	prepareHiddenCommand(launchCmd)
+	err := launchCmd.Start()
+	if err != nil {
+		return map[string]interface{}{"success": false, "error": err.Error()}
+	}
+	
+	// Don't wait for explorer to exit, just return success immediately
+	return map[string]interface{}{"success": true}
+}
+
+// CancelInjection sets the cancel flag
+func (a *App) CancelInjection() {
+	a.cancelInject = true
+}
+
 // GetMinecraftUsername reads mp_username from Minecraft's options.txt
 func (a *App) GetMinecraftUsername() string {
 	return a.readMinecraftUsername()
@@ -227,6 +248,14 @@ func (a *App) SetRPCLauncher() {
 	a.setLauncherPresence()
 }
 
+// logToFrontend emits a log event to the frontend and prints to console
+func (a *App) logToFrontend(msg string, level string) {
+	fmt.Printf("[%s] %s\n", strings.ToUpper(level), msg)
+	if a.ctx != nil {
+		runtime.EventsEmit(a.ctx, "app:log", msg, level)
+	}
+}
+
 // --- Helpers ---
 
 func isMinecraftRunning() bool {
@@ -236,7 +265,7 @@ func isMinecraftRunning() bool {
 	if err != nil {
 		return false
 	}
-	return strings.Contains(string(out), "Minecraft.Win10.DX11.exe")
+	return strings.Contains(strings.ToLower(string(out)), strings.ToLower("Minecraft.Win10.DX11.exe"))
 }
 
 func (a *App) readMinecraftUsername() string {
@@ -282,6 +311,63 @@ func (a *App) GetMinecraftVersion() string {
 	}
 	return strings.TrimSpace(string(out))
 }
+
+// GetMinecraftSkinBase64 reads custom.png and returns it as a base64 string.
+func (a *App) GetMinecraftSkinBase64() string {
+	localAppData := os.Getenv("LOCALAPPDATA")
+	if localAppData == "" {
+		fmt.Println("[Skin] LOCALAPPDATA env var not found")
+		return ""
+	}
+	
+	// The exact path provided by the user
+	skinPath := filepath.Join(
+		localAppData,
+		"Packages", "Microsoft.MinecraftUWP_8wekyb3d8bbwe",
+		"LocalState", "games", "com.mojang", "minecraftpe", "custom.png",
+	)
+	
+	if _, err := os.Stat(skinPath); os.IsNotExist(err) {
+		a.logToFrontend(fmt.Sprintf("Skin file not found at: %s", skinPath), "warn")
+		
+		// Debug: list directory contents
+		dir := filepath.Dir(skinPath)
+		entries, err := os.ReadDir(dir)
+		if err == nil {
+			var files []string
+			for _, e := range entries {
+				files = append(files, e.Name())
+			}
+			a.logToFrontend(fmt.Sprintf("Contents of %s: %v", dir, files), "info")
+		} else {
+			a.logToFrontend(fmt.Sprintf("Could not read directory %s: %v", dir, err), "error")
+		}
+		return ""
+	}
+
+	data, err := os.ReadFile(skinPath)
+	if err != nil {
+		a.logToFrontend(fmt.Sprintf("Failed to read skin: %v", err), "error")
+		return ""
+	}
+
+	// Validate image
+	reader := strings.NewReader(string(data))
+	config, _, err := image.DecodeConfig(reader)
+	if err != nil {
+		a.logToFrontend(fmt.Sprintf("Skin file is not a valid image: %v", err), "error")
+		return ""
+	}
+	
+	a.logToFrontend(fmt.Sprintf("Skin loaded: %dx%d, %d bytes", config.Width, config.Height, len(data)), "info")
+	
+	if config.Width != 64 || (config.Height != 64 && config.Height != 32) {
+		a.logToFrontend(fmt.Sprintf("Warning: Skin dimensions (%dx%d) are unusual for Minecraft.", config.Width, config.Height), "warn")
+	}
+
+	return "data:image/png;base64," + base64.StdEncoding.EncodeToString(data)
+}
+
 
 func (a *App) SelectDLL() string {
 	fp, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
@@ -369,6 +455,21 @@ func (a *App) updateChecker() {
 	// Check immediately on start
 	a.checkForUpdates()
 
+	// Ensure updater.exe is downloaded and up to date in the background
+	go func() {
+		appData := os.Getenv("APPDATA")
+		if appData == "" {
+			return
+		}
+		launcherDir := filepath.Join(appData, "AmatayakulLauncher", "client-sources")
+		os.MkdirAll(launcherDir, 0755)
+		updaterPath := filepath.Join(launcherDir, "updater.exe")
+		updaterVersionPath := filepath.Join(launcherDir, "updater_version.txt")
+		if err := a.ensureAssetUpdated("AnarchDevelopment/AmatayakulUpdater", updaterPath, updaterVersionPath); err != nil {
+			runtime.LogErrorf(a.ctx, "Failed to check/update updater.exe: %v", err)
+		}
+	}()
+
 	// Then every 1 minute
 	ticker := time.NewTicker(1 * time.Minute)
 	for {
@@ -406,6 +507,9 @@ func (a *App) checkForUpdates() {
 
 	var release struct {
 		TagName string `json:"tag_name"`
+		Assets  []struct {
+			BrowserDownloadURL string `json:"browser_download_url"`
+		} `json:"assets"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
 		return
@@ -413,8 +517,53 @@ func (a *App) checkForUpdates() {
 
 	remoteVersion := strings.TrimPrefix(release.TagName, "v")
 	if isNewerVersion(appVersion, remoteVersion) {
-		runtime.EventsEmit(a.ctx, "update:available", remoteVersion)
+		downloadUrl := ""
+		if len(release.Assets) > 0 {
+			downloadUrl = release.Assets[0].BrowserDownloadURL
+		}
+		runtime.EventsEmit(a.ctx, "update:available", map[string]string{
+			"version": remoteVersion,
+			"url":     downloadUrl,
+		})
 	}
+}
+
+func (a *App) StartUpdate(downloadUrl string, lang string) map[string]interface{} {
+	appData := os.Getenv("APPDATA")
+	if appData == "" {
+		return map[string]interface{}{"success": false, "error": "APPDATA not found"}
+	}
+
+	launcherDir := filepath.Join(appData, "AmatayakulLauncher", "client-sources")
+	os.MkdirAll(launcherDir, 0755)
+
+	updaterPath := filepath.Join(launcherDir, "updater.exe")
+	updaterVersionPath := filepath.Join(launcherDir, "updater_version.txt")
+
+	// Ensure updater is downloaded and up to date
+	if err := a.ensureAssetUpdated("AnarchDevelopment/AmatayakulUpdater", updaterPath, updaterVersionPath); err != nil {
+		runtime.LogErrorf(a.ctx, "Failed to download updater: %v", err)
+		return map[string]interface{}{"success": false, "error": "Failed to download updater: " + err.Error()}
+	}
+
+	exePath, err := os.Executable()
+	if err != nil {
+		exePath = "AmatayakulLauncher.exe"
+	}
+
+	pid := os.Getpid()
+
+	cmd := exec.Command(updaterPath, "-update", "-path", exePath, "-url", downloadUrl, "-pid", fmt.Sprintf("%d", pid), "-lang", lang)
+	if err := cmd.Start(); err != nil {
+		return map[string]interface{}{"success": false, "error": "Failed to launch updater: " + err.Error()}
+	}
+
+	go func() {
+		time.Sleep(500 * time.Millisecond)
+		os.Exit(0)
+	}()
+
+	return map[string]interface{}{"success": true}
 }
 
 func isNewerVersion(current, remote string) bool {
@@ -438,7 +587,7 @@ func isNewerVersion(current, remote string) bool {
 
 // PerformInjection downloads mara + DLL if needed, launches Minecraft, and injects.
 // When skipLaunch=true it skips launching Minecraft (used for "inject anyways").
-func (a *App) PerformInjection(customDll string, skipLaunch bool, checkMara bool, checkDll bool) map[string]interface{} {
+func (a *App) PerformInjection(customDll string, skipLaunch bool, checkMara bool, checkDll bool, cooldownVal int) map[string]interface{} {
 	appData := os.Getenv("APPDATA")
 	if appData == "" {
 		return map[string]interface{}{"success": false, "error": "APPDATA not found"}
@@ -494,7 +643,7 @@ func (a *App) PerformInjection(customDll string, skipLaunch bool, checkMara bool
 	if !skipLaunch {
 		launchCmd := exec.Command("explorer.exe", "shell:AppsFolder\\Microsoft.MinecraftUWP_8wekyb3d8bbwe!App")
 		prepareHiddenCommand(launchCmd)
-		launchCmd.Run()
+		launchCmd.Start()
 
 		// 4. Wait for Minecraft to start (up to 10s)
 		minecraftRunning := false
@@ -509,23 +658,47 @@ func (a *App) PerformInjection(customDll string, skipLaunch bool, checkMara bool
 			return map[string]interface{}{"success": false, "error": "Minecraft failed to start in time"}
 		}
 
-		// 5. Wait 1 second before injecting
-		time.Sleep(1 * time.Second)
+		// 5. Cooldown instead of pixel detector
+		a.cancelInject = false
+		for i := cooldownVal; i > 0; i-- {
+			if a.cancelInject {
+				a.logToFrontend("Injection cancelled.", "info")
+				return map[string]interface{}{"success": false, "error": "cancelled"}
+			}
+			a.logToFrontend(fmt.Sprintf("Waiting for %d seconds before injection...", i), "info")
+			time.Sleep(1 * time.Second)
+		}
+	} else {
+        // If skipping launch, wait a small bit just to ensure process is settled
+        time.Sleep(2 * time.Second)
+    }
+
+	// Bring game to foreground before injecting
+	a.logToFrontend("Focusing game window...", "info")
+	focusCmd := exec.Command("explorer.exe", "shell:AppsFolder\\Microsoft.MinecraftUWP_8wekyb3d8bbwe!App")
+	prepareHiddenCommand(focusCmd)
+	focusCmd.Start()
+	time.Sleep(500 * time.Millisecond)
+
+	// Check if game is still running before firing injector
+	if !isMinecraftRunning() {
+		return map[string]interface{}{"success": false, "error": "process_not_found"}
 	}
 
-	// Set ACL permissions for UWP
-	icaclsCmd := exec.Command("icacls.exe", dllPath, "/grant", "*S-1-15-2-1:(RX)")
-	prepareHiddenCommand(icaclsCmd)
-	icaclsCmd.Run()
-
+	a.logToFrontend(fmt.Sprintf("Injecting with Mara: %s", maraPath), "info")
 	cmd := exec.Command(maraPath, "Minecraft.Win10.DX11.exe", dllPath)
 	prepareHiddenCommand(cmd)
 	out, err := cmd.CombinedOutput()
+	outputStr := string(out)
 
-	success := strings.Contains(strings.ToLower(string(out)), "successfully injected")
+	a.logToFrontend(fmt.Sprintf("Mara Output: %s", outputStr), "system")
+
+	success := strings.Contains(strings.ToLower(outputStr), "successfully injected")
 
 	if success {
+		a.logToFrontend("Injection successful!", "success")
 		runtime.WindowMinimise(a.ctx)
+		
 		psCommand := `
 [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
 $xml = @"
@@ -549,28 +722,40 @@ $toast = [Windows.UI.Notifications.ToastNotification]::new($xmlDoc)
 
 		// Switch RPC to in-game presence
 		a.setGamePresence()
+	} else if err != nil {
+		a.logToFrontend(fmt.Sprintf("Injection failed: %v", err), "error")
 	}
 
 	return map[string]interface{}{
 		"success": success,
-		"output":  string(out),
+		"output":  outputStr,
 		"error":   fmt.Sprintf("%v", err),
 	}
 }
 
+// LogJS allows the frontend to print messages to the native console
+func (a *App) LogJS(msg string, level string) {
+	a.logToFrontend(msg, level)
+}
+
 func main() {
-	// Check for version flag
+	isDebug := false
 	for _, arg := range os.Args {
 		lowerArg := strings.ToLower(arg)
 		if lowerArg == "-v" || lowerArg == "-version" || lowerArg == "--version" {
-			// In Windows GUI mode, we must attach to the parent console to show output
 			AttachConsole()
 			fmt.Println(appVersion)
-			os.Exit(1)
+			os.Exit(0)
+		}
+		if lowerArg == "-debug" || lowerArg == "--debug" {
+			isDebug = true
 		}
 	}
 
 	app := NewApp()
+	if isDebug {
+		app.OpenConsole()
+	}
 
 	err := wails.Run(&options.App{
 		Title:     "Amatayakul Launcher",
