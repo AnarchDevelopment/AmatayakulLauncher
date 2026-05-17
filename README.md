@@ -21,5 +21,6 @@ powershell.exe .\mara.exe Minecraft.Win10.DX11.exe %appdata%\AmatayakulLauncher\
 
 ## Previa
 
-<img width="1127" height="755" alt="image" src="https://github.com/user-attachments/assets/9e7968ed-513c-4872-93dd-ead2dd49ac92" />
+<img width="1128" height="752" alt="image" src="https://github.com/user-attachments/assets/652f44f0-35af-480c-b096-eba4d4c57410" />
+
 
