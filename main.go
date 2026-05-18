@@ -32,7 +32,66 @@ var assets embed.FS
 // Discord Application ID for Amatayakul Launcher
 const discordAppID = "1503246619368362094"
 
-const appVersion = "1.1.0"
+const appVersion = "1.1.1"
+
+type AppConfig struct {
+	Language          string `json:"language"`
+	CustomDLL         string `json:"custom_dll"`
+	AutoInject        bool   `json:"auto_inject"`
+	InjectCooldown    int    `json:"inject_cooldown"`
+	CheckMara         bool   `json:"check_mara"`
+	CheckDll          bool   `json:"check_dll"`
+	SkipInjectWarning bool   `json:"skip_inject_warning"`
+}
+
+func getConfigPath() string {
+	appData := os.Getenv("APPDATA")
+	if appData == "" {
+		return ""
+	}
+	return filepath.Join(appData, "AmatayakulLauncher", "config", "config.json")
+}
+
+func loadConfig() AppConfig {
+	cfg := AppConfig{
+		Language:          "es",
+		CustomDLL:         "",
+		AutoInject:        false,
+		InjectCooldown:    10,
+		CheckMara:         true,
+		CheckDll:          true,
+		SkipInjectWarning: false,
+	}
+	path := getConfigPath()
+	if path == "" {
+		return cfg
+	}
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return cfg
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return cfg
+	}
+	_ = json.Unmarshal(data, &cfg)
+	return cfg
+}
+
+func saveConfig(cfg AppConfig) error {
+	path := getConfigPath()
+	if path == "" {
+		return fmt.Errorf("APPDATA not set")
+	}
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
+	data, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(path, data, 0644)
+}
 
 type App struct {
 	ctx          context.Context
@@ -42,6 +101,18 @@ type App struct {
 	launchTime   time.Time          // when the launcher started (for RPC timestamp)
 	lastPresence string             // "launcher" or "game" to avoid redundant updates
 	cancelInject bool               // Flag to cancel injection during cooldown
+}
+
+func (a *App) GetConfig() AppConfig {
+	return loadConfig()
+}
+
+func (a *App) SaveConfig(cfg AppConfig) map[string]interface{} {
+	err := saveConfig(cfg)
+	if err != nil {
+		return map[string]interface{}{"success": false, "error": err.Error()}
+	}
+	return map[string]interface{}{"success": true}
 }
 
 func NewApp() *App {
@@ -757,6 +828,18 @@ func main() {
 		app.OpenConsole()
 	}
 
+	var webviewUserDataPath string
+	if appData := os.Getenv("APPDATA"); appData != "" {
+		// Save webview things at AmatayakulLauncher/WebView2
+		webviewDir := filepath.Join(appData, "AmatayakulLauncher", "WebView2")
+		_ = os.MkdirAll(webviewDir, 0755)
+		webviewUserDataPath = webviewDir
+
+		// Ensure config directory exists
+		configDir := filepath.Join(appData, "AmatayakulLauncher", "config")
+		_ = os.MkdirAll(configDir, 0755)
+	}
+
 	err := wails.Run(&options.App{
 		Title:     "Amatayakul Launcher",
 		Width:     900,
@@ -776,6 +859,7 @@ func main() {
 			WindowIsTranslucent:  true,
 			BackdropType:         windows.Mica,
 			DisableWindowIcon:    false,
+			WebviewUserDataPath:  webviewUserDataPath,
 		},
 	})
 

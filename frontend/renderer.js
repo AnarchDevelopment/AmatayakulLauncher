@@ -85,6 +85,57 @@ document.addEventListener('DOMContentLoaded', () => {
     let manualLaunchWaiting = false;
     let launchBlocker = false; // Prevents process watcher from resetting state during startup
 
+    // ── Settings Cache & Backend Integration ──────────────────
+    let appSettings = {
+        language: 'es',
+        custom_dll: '',
+        auto_inject: false,
+        inject_cooldown: 10,
+        check_mara: true,
+        check_dll: true,
+        skip_inject_warning: false
+    };
+
+    async function loadSettingsFromBackend() {
+        try {
+            if (window.go && window.go.main && window.go.main.App) {
+                const cfg = await window.go.main.App.GetConfig();
+                if (cfg) {
+                    appSettings = cfg;
+                    applySettingsToUI();
+                }
+            }
+        } catch (e) {
+            console.error('Failed to load settings:', e);
+        }
+    }
+
+    async function saveSettingsToBackend() {
+        try {
+            if (window.go && window.go.main && window.go.main.App) {
+                await window.go.main.App.SaveConfig(appSettings);
+            }
+        } catch (e) {
+            console.error('Failed to save settings:', e);
+        }
+    }
+
+    function applySettingsToUI() {
+        setLanguage(appSettings.language, false);
+        if (customDllPath) customDllPath.value = appSettings.custom_dll || '';
+        if (checkMaraUpdate) checkMaraUpdate.checked = appSettings.check_mara;
+        if (checkDllUpdate) checkDllUpdate.checked = appSettings.check_dll;
+        if (autoInjectToggle) {
+            autoInjectToggle.checked = appSettings.auto_inject;
+            if (autoInjectToggle.checked && autoInjectOptions) {
+                autoInjectOptions.classList.add('active');
+            } else if (autoInjectOptions) {
+                autoInjectOptions.classList.remove('active');
+            }
+        }
+        if (injectCooldown) injectCooldown.value = appSettings.inject_cooldown;
+    }
+
     // ── Internationalization (i18n) ─────────────────────────
     const translations = {
         es: {
@@ -273,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function getTranslation(key) {
-        const lang = localStorage.getItem('amatayakul_language') || 'en';
+        const lang = appSettings.language || 'en';
         const dict = translations[lang] || translations['en'];
         let trans = dict[key] || key;
         
@@ -299,8 +350,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) el.textContent = getTranslation(key);
     }
 
-    function setLanguage(lang) {
-        localStorage.setItem('amatayakul_language', lang);
+    function setLanguage(lang, shouldSave = true) {
+        appSettings.language = lang;
+        if (shouldSave) {
+            saveSettingsToBackend();
+        }
         if (!translations[lang]) lang = 'en';
         const dict = translations[lang];
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -355,8 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const savedLang = localStorage.getItem('amatayakul_language') || 'es';
-    setLanguage(savedLang);
+    setLanguage(appSettings.language, false);
 
     if (languageSelect) {
         const selected = languageSelect.querySelector('.select-selected');
@@ -599,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Manual Injection Confirmation
         if (manualLaunchWaiting) {
-            const skip = localStorage.getItem('amatayakul_skip_inject_warning') === 'true';
+            const skip = appSettings.skip_inject_warning === true;
             if (skip) {
                 manualLaunchWaiting = false;
                 await performInject(true);
@@ -652,7 +705,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnContinueInject.addEventListener('click', async () => {
         if (skipInjectWarning && skipInjectWarning.checked) {
-            localStorage.setItem('amatayakul_skip_inject_warning', 'true');
+            appSettings.skip_inject_warning = true;
+            saveSettingsToBackend();
         }
         closeModal(manualInjectModal);
         manualLaunchWaiting = false;
@@ -772,7 +826,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeModal(updateModal);
             showStatus('Launching updater...', 'info');
             
-            const lang = localStorage.getItem('amatayakul_language') || 'es';
+            const lang = appSettings.language || 'es';
             
             window.go.main.App.StartUpdate(latestUpdateUrl, lang)
                 .then((res) => {
@@ -824,9 +878,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnClose) btnClose.addEventListener('click', () => window.runtime.Quit());
 
     // ── Settings Persistence ─────────────────────────────────
-    const savedDll = localStorage.getItem('amatayakul_custom_dll');
-    if (savedDll) customDllPath.value = savedDll;
-
     if (btnBrowse) {
         btnBrowse.addEventListener('click', async () => {
             try {
@@ -840,15 +891,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnSaveSettings) {
         btnSaveSettings.addEventListener('click', () => {
-            const val = customDllPath.value.trim();
-            if (val) localStorage.setItem('amatayakul_custom_dll', val);
-            else localStorage.removeItem('amatayakul_custom_dll');
+            appSettings.custom_dll = customDllPath.value.trim();
+            appSettings.check_mara = checkMaraUpdate.checked;
+            appSettings.check_dll = checkDllUpdate.checked;
+            appSettings.auto_inject = autoInjectToggle.checked;
+            appSettings.inject_cooldown = parseInt(injectCooldown.value) || 10;
             
-            localStorage.setItem('amatayakul_check_mara', checkMaraUpdate.checked);
-            localStorage.setItem('amatayakul_check_dll', checkDllUpdate.checked);
-            localStorage.setItem('amatayakul_auto_inject', autoInjectToggle.checked);
-            localStorage.setItem('amatayakul_inject_cooldown', injectCooldown.value);
-            
+            saveSettingsToBackend();
             closeSettingsModal();
         });
     }
@@ -861,29 +910,15 @@ document.addEventListener('DOMContentLoaded', () => {
             autoInjectToggle.checked = false;
             injectCooldown.value = 10;
             
-            localStorage.removeItem('amatayakul_custom_dll');
-            localStorage.setItem('amatayakul_check_mara', 'true');
-            localStorage.setItem('amatayakul_check_dll', 'true');
-            localStorage.setItem('amatayakul_auto_inject', 'false');
-            localStorage.setItem('amatayakul_inject_cooldown', '10');
+            appSettings.custom_dll = '';
+            appSettings.check_mara = true;
+            appSettings.check_dll = true;
+            appSettings.auto_inject = false;
+            appSettings.inject_cooldown = 10;
+            
+            saveSettingsToBackend();
         });
     }
-
-    // Load extra settings
-    const savedMaraCheck = localStorage.getItem('amatayakul_check_mara');
-    if (savedMaraCheck !== null && checkMaraUpdate) checkMaraUpdate.checked = savedMaraCheck === 'true';
-    
-    const savedDllCheck = localStorage.getItem('amatayakul_check_dll');
-    if (savedDllCheck !== null && checkDllUpdate) checkDllUpdate.checked = savedDllCheck === 'true';
-
-    const savedAutoInject = localStorage.getItem('amatayakul_auto_inject');
-    if (savedAutoInject !== null && autoInjectToggle) {
-        autoInjectToggle.checked = savedAutoInject === 'true';
-        if (autoInjectToggle.checked && autoInjectOptions) autoInjectOptions.classList.add('active');
-    }
-
-    const savedCooldown = localStorage.getItem('amatayakul_inject_cooldown');
-    if (savedCooldown !== null && injectCooldown) injectCooldown.value = savedCooldown;
 
     // ── Cinematic Flicker ────────────────────────────────────
     setInterval(() => {
@@ -956,6 +991,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function boot() {
+        // Load settings from backend before initializing other views
+        await loadSettingsFromBackend();
+
         try {
             const ver = await window.go.main.App.GetAppVersion();
             // Optional: put version somewhere
