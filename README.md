@@ -10,7 +10,7 @@ Por favor reportar bugs al discord abajo:
 
 Descarga ~
 
-https://github.com/AnarchDevelopment/amatayakul-client (amatayakul.dll)
+https://github.com/AnarchDevelopment/amatayakuldll (amatayakul.dll)
 
 https://github.com/AnarchDevelopment/MaraInjector (mara.exe)
 
