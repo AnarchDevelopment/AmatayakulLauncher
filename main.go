@@ -42,6 +42,7 @@ type AppConfig struct {
 	CheckMara         bool   `json:"check_mara"`
 	CheckDll          bool   `json:"check_dll"`
 	SkipInjectWarning bool   `json:"skip_inject_warning"`
+	ManageVersions    bool   `json:"manage_versions"`
 }
 
 func getConfigPath() string {
@@ -61,6 +62,7 @@ func loadConfig() AppConfig {
 		CheckMara:         true,
 		CheckDll:          true,
 		SkipInjectWarning: false,
+		ManageVersions:    false,
 	}
 	path := getConfigPath()
 	if path == "" {
@@ -804,6 +806,20 @@ $toast = [Windows.UI.Notifications.ToastNotification]::new($xmlDoc)
 	}
 }
 
+// ValidateDLLPath checks whether the given file path exists and ends with .dll.
+// Returns true if the path is valid (file exists on disk), false otherwise.
+// An empty path (meaning "use default") always returns true.
+func (a *App) ValidateDLLPath(path string) bool {
+	if path == "" {
+		return true
+	}
+	if !strings.HasSuffix(strings.ToLower(path), ".dll") {
+		return false
+	}
+	_, err := os.Stat(path)
+	return err == nil
+}
+
 // LogJS allows the frontend to print messages to the native console
 func (a *App) LogJS(msg string, level string) {
 	a.logToFrontend(msg, level)
@@ -844,6 +860,7 @@ func main() {
 		Title:     "Amatayakul Launcher",
 		Width:     900,
 		Height:    600,
+		WindowStartState: options.Maximised,
 		Frameless: true,
 		AssetServer: &assetserver.Options{
 			Assets: assets,

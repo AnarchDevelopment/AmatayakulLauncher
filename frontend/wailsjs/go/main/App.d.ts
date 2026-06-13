@@ -35,3 +35,5 @@ export function SetRPCIngame():Promise<void>;
 export function SetRPCLauncher():Promise<void>;
 
 export function StartUpdate(arg1:string,arg2:string):Promise<{[key: string]: any}>;
+
+export function ValidateDLLPath(arg1:string):Promise<boolean>;

@@ -4,9 +4,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const hideSplash = () => {
         if (splash && !splash.classList.contains('fade-out')) {
             splash.classList.add('fade-out');
+            splash.addEventListener('transitionend', () => {
+                splash.remove(); // Remove from DOM after fade-out completes
+            }, { once: true }); // Ensure this listener runs only once
         }
     };
+
+    // Add a global error handler for better debugging
+    window.onerror = function (message, source, lineno, colno, error) {
+        console.error("Uncaught JavaScript Error:", { message, source, lineno, colno, error });
+        if (window.go && window.go.main && window.go.main.App) {
+            window.go.main.App.LogJS(`Uncaught Error: ${message} at ${source}:${lineno}:${colno}`, 'error');
+        }
+        // Returning true prevents the default browser error handling (e.g., console output, dialogs)
+        return true; 
+    };
+
     setTimeout(hideSplash, 2500);
+
 
     // ── Element Refs ────────────────────────────────────────
     const btnLaunch          = document.getElementById('btnLaunch');
@@ -14,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnLaunchTitle     = btnLaunch ? btnLaunch.querySelector('.launch-title') : null;
     const btnLaunchSub       = btnLaunch ? btnLaunch.querySelector('.launch-subtitle') : null;
     const btnKill            = document.getElementById('btnKill');
-    const btnSettings        = document.getElementById('btnSettings');
+    const btnSettings        = document.getElementById('navSettings');
     const btnMinimize        = document.getElementById('btnMinimize');
     const btnMaximize        = document.getElementById('btnMaximize');
     const btnClose           = document.getElementById('btnClose');
@@ -22,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeSettings      = document.getElementById('closeSettings');
     const btnBrowse          = document.getElementById('btnBrowse');
     const btnSaveSettings    = document.getElementById('btnSaveSettings');
+    const btnSaveSettingsAdv = document.getElementById('btnSaveSettingsAdv');
     const btnResetSettings   = document.getElementById('btnResetSettings');
     const customDllPath      = document.getElementById('customDllPath');
     const versionText        = document.getElementById('versionText');
@@ -67,6 +83,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnContinueInject  = document.getElementById('btnContinueInject');
     const btnWaitInject      = document.getElementById('btnWaitInject');
     const skipInjectWarning  = document.getElementById('skipInjectWarning');
+
+    // Invalid DLL modal
+    const invalidDllModal      = document.getElementById('invalidDllModal');
+    const btnDllErrorSettings  = document.getElementById('btnDllErrorSettings');
+    const btnDllErrorRetry     = document.getElementById('btnDllErrorRetry');
     
     const newVersionTag      = document.getElementById('newVersionTag');
     
@@ -76,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkMaraUpdate    = document.getElementById('checkMaraUpdate');
     const checkDllUpdate     = document.getElementById('checkDllUpdate');
     const languageSelect     = document.getElementById('languageSelect');
+    const manageVersionsToggle = document.getElementById('manageVersionsToggle');
     
     // ── State ───────────────────────────────────────────────
     const REQUIRED_VERSION = '0.1510.0.0';
@@ -93,7 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
         inject_cooldown: 10,
         check_mara: true,
         check_dll: true,
-        skip_inject_warning: false
+        skip_inject_warning: false,
+        manage_versions: false
     };
 
     async function loadSettingsFromBackend() {
@@ -134,6 +157,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
         if (injectCooldown) injectCooldown.value = appSettings.inject_cooldown;
+        if (manageVersionsToggle) {
+            manageVersionsToggle.checked = appSettings.manage_versions || false;
+        }
     }
 
     // ── Internationalization (i18n) ─────────────────────────
@@ -141,10 +167,11 @@ document.addEventListener('DOMContentLoaded', () => {
         es: {
             nav_dashboard: "PANEL",
             nav_settings: "AJUSTES",
+            welcome_msg: "Bien venido(a), ",
             btn_enter: "INYECTAR",
-            btn_enter_sub: " ",
+            btn_enter_sub: "",
             btn_manual_launch: "JUGAR",
-            btn_manual_launch_sub: " ",
+            btn_manual_launch_sub: "",
             btn_ready_inject: "¿INYECTAR AHORA?",
             btn_ready_inject_sub: "JUEGO DETECTADO",
             btn_kill: "CERRAR",
@@ -153,6 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
             settings_title: "Ajustes",
             settings_language: "Idioma",
             settings_auto_inject: "Inyección Automática",
+            dll_error_title: "Camino inválido",
+            dll_error_desc: "¡Camino inválido de DLL! Por favor usa una DLL válida e intenta de nuevo.",
+            dll_error_settings: "Ajustes",
+            dll_error_retry: "Reintentar",
             settings_cooldown: "Tiempo de espera (s)",
             settings_cooldown_warn: "No recomendado para PCs lentos, use solo si su PC carga el juego en menos de 10 segundos, o establezca un tiempo personalizado para asegurar la estabilidad.",
             settings_payload: "Carga Inyectada",
@@ -207,10 +238,11 @@ document.addEventListener('DOMContentLoaded', () => {
         en: {
             nav_dashboard: "DASHBOARD",
             nav_settings: "SETTINGS",
+            welcome_msg: "Welcome, ",
             btn_enter: "INJECT",
-            btn_enter_sub: " ",
+            btn_enter_sub: "",
             btn_manual_launch: "LAUNCH",
-            btn_manual_launch_sub: " ",
+            btn_manual_launch_sub: "",
             btn_ready_inject: "INJECT NOW?",
             btn_ready_inject_sub: "GAME DETECTED",
             btn_kill: "KILL",
@@ -218,6 +250,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btn_cancel: "CANCEL",
             settings_title: "Settings",
             settings_language: "Language",
+            dll_error_title: "Invalid DLL Path",
+            dll_error_desc: "Invalid DLL path! Please set a valid DLL and try again.",
+            dll_error_settings: "Settings",
+            dll_error_retry: "Try Again",
             settings_auto_inject: "Auto Inject",
             settings_cooldown: "Injection Cooldown (s)",
             settings_cooldown_warn: "Not recommended for slower PCs, only use if your pc loads the game faster than 10 seconds, or set a custom cooldown matching your PC's loading speed to ensure stability.",
@@ -258,10 +294,11 @@ document.addEventListener('DOMContentLoaded', () => {
         pt: {
             nav_dashboard: "PAINEL",
             nav_settings: "CONFIGURAÇÕES",
+            welcome_msg: "Bem vindo(a), ",
             btn_enter: "INJETAR",
-            btn_enter_sub: " ",
+            btn_enter_sub: "",
             btn_manual_launch: "JOGAR",
-            btn_manual_launch_sub: " ",
+            btn_manual_launch_sub: "",
             btn_ready_inject: "INJETAR AGORA?",
             btn_ready_inject_sub: "JOGO DETECTADO",
             btn_kill: "FECHAR",
@@ -269,6 +306,10 @@ document.addEventListener('DOMContentLoaded', () => {
             btn_cancel: "CANCELAR",
             settings_title: "Configurações",
             settings_language: "Idioma",
+            dll_error_title: "Caminho inválido",
+            dll_error_desc: "Caminho de DLL inválido! Por favor use uma DLL válida e tente novamente.",
+            dll_error_settings: "Configurações",
+            dll_error_retry: "Tentar novamente",
             settings_auto_inject: "Injeção Automática",
             settings_cooldown: "Tempo de espera (s)",
             settings_cooldown_warn: "Não recomendado para PCs lentos, use apenas se o seu PC carregar o jogo em menos de 10 segundos, ou defina um tempo personalizado para garantir a estabilidade.",
@@ -326,7 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getTranslation(key) {
         const lang = appSettings.language || 'en';
         const dict = translations[lang] || translations['en'];
-        let trans = dict[key] || key;
+        let trans = dict[key] !== undefined ? dict[key] : key;
         
         // Handle dynamic backend messages
         if (key.startsWith("Waiting for ") && key.includes(" seconds before injection...")) {
@@ -367,6 +408,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+        
+        const playerNameDisplay = document.getElementById('playerNameDisplay');
+        if (playerNameDisplay && playerNameDisplay.dataset.username) {
+            const name = playerNameDisplay.dataset.username;
+            playerNameDisplay.innerHTML = `<span class="greeting-prefix">${getTranslation('welcome_msg').replace('{username}', '')}</span><span class="player-name-bold">${name}</span>`;
+        }
         
         if (isValidVersion) {
             if (isInjected) {
@@ -436,13 +483,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    // Sidebar Navigation page switching logic
+    document.querySelectorAll('.sidebar-nav-item').forEach(btn => {
         btn.addEventListener('click', () => {
-            const tabId = btn.getAttribute('data-tab');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const pageId = btn.getAttribute('data-page');
+            document.querySelectorAll('.sidebar-nav-item').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(`tab-${tabId}`).classList.add('active');
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const targetPage = document.getElementById(`page-${pageId}`);
+            if (targetPage) targetPage.classList.add('active');
+        });
+    });
+
+    // Settings Sub-tab switching logic
+    document.querySelectorAll('.settings-nav-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tabId = btn.getAttribute('data-stab');
+            document.querySelectorAll('.settings-nav-item').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.stab-content').forEach(c => c.classList.remove('active'));
+            const targetTab = document.getElementById(`stab-${tabId}`);
+            if (targetTab) targetTab.classList.add('active');
         });
     });
 
@@ -578,6 +639,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // ── DLL Validation Guard ─────────────────────────────────
+    async function validateDLLBeforeLaunch() {
+        const dllVal = customDllPath ? customDllPath.value.trim() : '';
+        // Empty = use default DLL, always valid
+        if (!dllVal) return true;
+        try {
+            const ok = await window.go.main.App.ValidateDLLPath(dllVal);
+            return ok;
+        } catch (e) {
+            console.error('DLL validation error:', e);
+            return false; // fail-safe: block on error
+        }
+    }
+
     async function performInject(skipLaunch = false) {
         if (isLaunching && !skipLaunch) return;
 
@@ -655,10 +730,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const skip = appSettings.skip_inject_warning === true;
             if (skip) {
                 manualLaunchWaiting = false;
+                // Validate DLL even in this path
+                if (!await validateDLLBeforeLaunch()) { openModal(invalidDllModal); return; }
                 await performInject(true);
             } else {
                 openModal(manualInjectModal);
             }
+            return;
+        }
+
+        // Validate DLL before any launch flow
+        if (!await validateDLLBeforeLaunch()) {
+            openModal(invalidDllModal);
             return;
         }
 
@@ -792,7 +875,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const autoInjectEnabled = autoInjectToggle && autoInjectToggle.checked;
                 if (autoInjectEnabled) {
                     console.log("Auto-Inject: Game detected, starting injection...");
-                    performInject(true /* skipLaunch since it's already running */);
+                    validateDLLBeforeLaunch().then(ok => {
+                        if (!ok) { openModal(invalidDllModal); return; }
+                        performInject(true /* skipLaunch since it's already running */);
+                    });
                 }
             }
         } else {
@@ -850,15 +936,34 @@ document.addEventListener('DOMContentLoaded', () => {
     function openModal(el) { el.classList.add('active'); }
     function closeModal(el) { el.classList.remove('active'); }
 
-    // Settings
-    function openSettings() { openModal(settingsModal); }
-    function closeSettingsModal() { closeModal(settingsModal); }
+    // ── Invalid DLL Modal Buttons ────────────────────────────
+    if (btnDllErrorSettings) {
+        btnDllErrorSettings.addEventListener('click', () => {
+            closeModal(invalidDllModal);
+            openSettings();
+        });
+    }
+    if (btnDllErrorRetry) {
+        btnDllErrorRetry.addEventListener('click', async () => {
+            closeModal(invalidDllModal);
+            // Re-validate; if now OK, resume the launch
+            if (await validateDLLBeforeLaunch()) {
+                btnLaunch.click();
+            } else {
+                openModal(invalidDllModal);
+            }
+        });
+    }
 
-    btnSettings.addEventListener('click', openSettings);
-    if (closeSettings) closeSettings.addEventListener('click', closeSettingsModal);
-    if (settingsModal) settingsModal.addEventListener('click', (e) => {
-        if (e.target === settingsModal) closeSettingsModal();
-    });
+    // Settings
+    function openSettings() {
+        document.querySelectorAll('.sidebar-nav-item').forEach(b => {
+            if (b.getAttribute('data-page') === 'settings') {
+                b.click();
+            }
+        });
+    }
+    function closeSettingsModal() { /* Modal is now a page, no-op */ }
 
     // Expansion logic
     if (btnExpandUpdates) {
@@ -889,17 +994,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function saveAllSettings() {
+        appSettings.custom_dll = customDllPath.value.trim();
+        appSettings.check_mara = checkMaraUpdate.checked;
+        appSettings.check_dll = checkDllUpdate.checked;
+        appSettings.auto_inject = autoInjectToggle.checked;
+        appSettings.inject_cooldown = parseInt(injectCooldown.value) || 10;
+        if (manageVersionsToggle) {
+            appSettings.manage_versions = manageVersionsToggle.checked;
+        }
+        
+        saveSettingsToBackend();
+        showStatus('Settings saved!', 'success');
+    }
+
     if (btnSaveSettings) {
-        btnSaveSettings.addEventListener('click', () => {
-            appSettings.custom_dll = customDllPath.value.trim();
-            appSettings.check_mara = checkMaraUpdate.checked;
-            appSettings.check_dll = checkDllUpdate.checked;
-            appSettings.auto_inject = autoInjectToggle.checked;
-            appSettings.inject_cooldown = parseInt(injectCooldown.value) || 10;
-            
-            saveSettingsToBackend();
-            closeSettingsModal();
-        });
+        btnSaveSettings.addEventListener('click', saveAllSettings);
+    }
+    if (btnSaveSettingsAdv) {
+        btnSaveSettingsAdv.addEventListener('click', saveAllSettings);
     }
 
     if (btnResetSettings) {
@@ -909,14 +1022,19 @@ document.addEventListener('DOMContentLoaded', () => {
             checkDllUpdate.checked = true;
             autoInjectToggle.checked = false;
             injectCooldown.value = 10;
+            if (manageVersionsToggle) {
+                manageVersionsToggle.checked = false;
+            }
             
             appSettings.custom_dll = '';
             appSettings.check_mara = true;
             appSettings.check_dll = true;
             appSettings.auto_inject = false;
             appSettings.inject_cooldown = 10;
+            appSettings.manage_versions = false;
             
             saveSettingsToBackend();
+            showStatus('Settings reset to default!', 'success');
         });
     }
 
@@ -1004,7 +1122,8 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const username = await window.go.main.App.GetMinecraftUsername();
             if (username && playerNameDisplay) {
-                playerNameDisplay.textContent = username;
+                playerNameDisplay.dataset.username = username;
+                playerNameDisplay.innerHTML = `<span class="greeting-prefix">${getTranslation('welcome_msg').replace('{username}', '')}</span><span class="player-name-bold">${username}</span>`;
                 const topUserName = document.querySelector('.user-name');
                 if (topUserName) topUserName.textContent = username;
             }

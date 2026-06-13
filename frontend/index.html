@@ -6,7 +6,7 @@
     <title>Amatayakul Launcher</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;500;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -49,203 +49,297 @@
             </div>
         </header>
 
-        <!-- Main Layout -->
-        <main class="main-content" style="--wails-draggable:no-drag">
-            <div class="player-card-wrapper">
-                <div class="player-card">
-                    <!-- Top Logo -->
-                    <div class="card-logo-container">
-                        <img src="amatayakul.png" alt="Amatayakul Logo" class="main-logo"/>
-                    </div>
+        <!-- Main Layout: Sidebar + Content -->
+        <div class="layout-wrapper" style="--wails-draggable:no-drag">
 
-                    <div class="card-content-row">
-                        <!-- Left: Skin -->
-                        <div class="skin-section">
-                            <div class="skin-container" id="skinContainer">
-                                <!-- 3D render goes here -->
-                            </div>
-                        </div>
+            <!-- ── Sidebar ── -->
+            <nav class="sidebar">
+                <div class="sidebar-logo-wrap">
+                    <img src="amatayakul.png" alt="Amatayakul" class="sidebar-logo"/>
+                </div>
 
-                        <!-- Right: Info & Actions -->
-                        <div class="info-section">
-                            <div class="user-header">
-                                <h2 class="player-name-display" id="playerNameDisplay">Player</h2>
-                                <!-- Restored Status -->
-                                <div class="status-box status-box--compact">
-                                    <div class="status-dot" id="statusDot"></div>
-                                    <span class="status-text" id="versionText" data-i18n="status_ready">Ready</span>
+                <ul class="sidebar-nav">
+                    <li>
+                        <button class="sidebar-nav-item active" id="navHome" data-page="home">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            <span data-i18n="nav_home">Home</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="sidebar-nav-item" id="navTextures" data-page="textures">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            <span data-i18n="nav_textures">Texture Packs</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="sidebar-nav-item" id="navSettings" data-page="settings">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2"/></svg>
+                            <span data-i18n="nav_settings">Settings</span>
+                        </button>
+                    </li>
+                </ul>
+
+
+            </nav>
+
+            <!-- ── Page Content ── -->
+            <main class="page-content">
+
+                <!-- HOME page -->
+                <div class="page active" id="page-home">
+                    <div class="home-inner">
+                        <div class="player-card-wrapper">
+                            <div class="player-card">
+                                <div class="card-content-row">
+                                    <!-- Left: Skin -->
+                                    <div class="skin-section">
+                                        <div class="skin-container" id="skinContainer">
+                                            <!-- 3D render goes here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Right: Info & Actions -->
+                                    <div class="info-section">
+                                        <div class="user-header">
+                                            <h2 class="player-name-display" id="playerNameDisplay">Player</h2>
+                                        </div>
+
+                                        <div class="actions-group">
+                                            <button class="btn-launch-laby" id="btnLaunch" disabled>
+                                                <div class="launch-icon-wrapper">
+                                                    <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+                                                </div>
+                                                <div class="launch-text-col">
+                                                    <span class="launch-title" data-i18n="btn_enter">Inject</span>
+                                                    <span class="launch-subtitle" data-i18n="btn_enter_sub">Start &amp; Inject</span>
+                                                </div>
+                                            </button>
+
+                                            <button class="btn-kill-laby" id="btnKill" style="display:none;">
+                                                <div class="launch-icon-wrapper">
+                                                    <svg class="kill-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
+                                                </div>
+                                                <div class="launch-text-col">
+                                                    <span class="launch-title" data-i18n="btn_kill">Kill</span>
+                                                    <span class="launch-subtitle" data-i18n="btn_kill_sub">Terminate Minecraft</span>
+                                                </div>
+                                            </button>
+
+                                            <button class="btn-kill-laby" id="btnCancelLaunch" style="display:none;">
+                                                <div class="launch-icon-wrapper">
+                                                    <svg class="kill-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
+                                                </div>
+                                                <div class="launch-text-col">
+                                                    <span class="launch-title" data-i18n="btn_cancel">Cancel</span>
+                                                    <span class="launch-subtitle"> </span>
+                                                </div>
+                                            </button>
+
+                                            <div class="orchestration-area" id="progressContainer" style="display: none;">
+                                                <div class="orchestration-bar">
+                                                    <div class="orchestration-fill" id="progressFill"></div>
+                                                </div>
+                                                <span class="orchestration-label" id="progressText">Starting...</span>
+                                            </div>
+                                            <div class="status-message" id="statusMessage"></div>
+                                            <div class="status-row" id="statusRow">
+                                                <div class="status-dot" id="statusDot"></div>
+                                                <span class="status-text" id="versionText" data-i18n="status_ready">Ready</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <div class="actions-group">
-                                <button class="btn-launch-laby" id="btnLaunch" disabled>
-                                    <div class="launch-icon-wrapper">
-                                        <svg class="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
-                                    </div>
-                                    <div class="launch-text-col">
-                                        <span class="launch-title" data-i18n="btn_enter">Inject</span>
-                                        <span class="launch-subtitle" data-i18n="btn_enter_sub">Start & Inject</span>
-                                    </div>
-                                </button>
+                <!-- TEXTURE PACKS page -->
+                <div class="page" id="page-textures">
+                    <div class="page-header">
+                        <h1 class="page-title" data-i18n="nav_textures">Texture Packs</h1>
+                        <p class="page-subtitle" data-i18n="textures_subtitle">Customize your Minecraft experience.</p>
+                    </div>
+                    <div class="coming-soon-wrap">
+                        <div class="coming-soon-card">
+                            <div class="coming-soon-icon">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                            </div>
+                            <h2 class="coming-soon-title" data-i18n="coming_soon_title">Coming Soon</h2>
+                            <p class="coming-soon-desc" data-i18n="coming_soon_desc">Texture pack management is on the way. Stay tuned for updates.</p>
+                        </div>
+                    </div>
+                </div>
 
-                                <button class="btn-kill-laby" id="btnKill" style="display:none;">
-                                    <div class="launch-icon-wrapper">
-                                        <svg class="kill-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
-                                    </div>
-                                    <div class="launch-text-col">
-                                        <span class="launch-title" data-i18n="btn_kill">Kill</span>
-                                        <span class="launch-subtitle" data-i18n="btn_kill_sub">Terminate Minecraft</span>
-                                    </div>
-                                </button>
-
-                                <button class="btn-kill-laby" id="btnCancelLaunch" style="display:none;">
-                                    <div class="launch-icon-wrapper">
-                                        <svg class="kill-icon" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
-                                    </div>
-                                    <div class="launch-text-col">
-                                        <span class="launch-title" data-i18n="btn_cancel">Cancel</span>
-                                        <span class="launch-subtitle"> </span>
-                                    </div>
-                                </button>
-
-                                <div class="secondary-actions">
-                                    <button class="action-item-btn" id="btnSettings">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
-                                        <span data-i18n="nav_settings">Settings</span>
+                <!-- SETTINGS page -->
+                <div class="page" id="page-settings">
+                    <div class="settings-layout">
+                        <!-- Settings Sidebar Tabs -->
+                        <div class="settings-sidebar">
+                            <div class="page-header" style="margin-bottom: 16px;">
+                                <h1 class="page-title" data-i18n="nav_settings">Settings</h1>
+                            </div>
+                            <ul class="settings-nav">
+                                <li>
+                                    <button class="settings-nav-item active" data-stab="general">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                                        <span data-i18n="settings_general">General</span>
                                     </button>
+                                </li>
+                                <li>
+                                    <button class="settings-nav-item" data-stab="advanced">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                        <span data-i18n="settings_advanced">Advanced</span>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Settings Content -->
+                        <div class="settings-content-area">
+
+                            <!-- General Tab -->
+                            <div class="stab-content active" id="stab-general">
+                                <div class="settings-section">
+                                    <h3 class="settings-section-title" data-i18n="settings_language">Language</h3>
+                                    <div class="settings-card">
+                                        <div class="field">
+                                            <div class="field-row">
+                                                <div class="custom-select" id="languageSelect">
+                                                    <div class="select-selected">
+                                                        <span class="select-content">
+                                                            <svg width="16" height="12" viewBox="0 0 16 12"><rect width="16" height="12" fill="#AA151B"/><rect y="3" width="16" height="6" fill="#F1BF00"/></svg>
+                                                            <span>Español</span>
+                                                        </span>
+                                                        <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                                                    </div>
+                                                    <div class="select-items select-hide">
+                                                        <div data-value="es">
+                                                            <svg width="16" height="12" viewBox="0 0 16 12"><rect width="16" height="12" fill="#AA151B"/><rect y="3" width="16" height="6" fill="#F1BF00"/></svg>
+                                                            <span>Español</span>
+                                                        </div>
+                                                        <div data-value="en">
+                                                            <svg width="16" height="12" viewBox="0 0 16 12"><rect width="16" height="12" fill="#B22234"/><rect y="1.5" width="16" height="1.5" fill="#FFF"/><rect y="4.5" width="16" height="1.5" fill="#FFF"/><rect y="7.5" width="16" height="1.5" fill="#FFF"/><rect y="10.5" width="16" height="1.5" fill="#FFF"/><rect width="7" height="6.5" fill="#3C3B6E"/></svg>
+                                                            <span>English</span>
+                                                        </div>
+                                                        <div data-value="pt">
+                                                            <svg width="16" height="12" viewBox="0 0 16 12"><rect width="16" height="12" fill="#009C3B"/><polygon points="8,1 15,6 8,11 1,6" fill="#FFDF00"/><circle cx="8" cy="6" r="2.5" fill="#002776"/></svg>
+                                                            <span>Português (Brasil)</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="orchestration-area" id="progressContainer" style="display: none;">
-                                    <div class="orchestration-bar">
-                                        <div class="orchestration-fill" id="progressFill"></div>
+                                <div class="settings-section">
+                                    <h3 class="settings-section-title" data-i18n="settings_injection">Injection</h3>
+                                    <div class="settings-card">
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <span class="setting-label" data-i18n="settings_auto_inject">Auto Inject</span>
+                                                <span class="setting-desc" data-i18n="settings_auto_inject_desc">Automatically inject when Minecraft launches.</span>
+                                            </div>
+                                            <div class="toggle-switch">
+                                                <input type="checkbox" id="autoInjectToggle">
+                                                <span class="toggle-slider"></span>
+                                            </div>
+                                        </div>
+                                        <div id="autoInjectOptions" class="expandable-section">
+                                            <div class="setting-item" style="margin-top: 15px;">
+                                                <span class="setting-label" data-i18n="settings_cooldown">Injection Cooldown (s)</span>
+                                                <input type="number" id="injectCooldown" value="10" min="1" max="60" style="width: 60px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 5px; border-radius: 4px; text-align: center;">
+                                            </div>
+                                            <p class="field-info" data-i18n="settings_cooldown_warn" style="color: #ffcc00; font-size: 0.85em; line-height: 1.4; margin-top: 10px; border-left: 2px solid #ffcc00; padding-left: 10px;">
+                                                Not recommended for slower PCs, only use if your pc loads the game faster than 10 seconds, or set a custom cooldown matching your PC's loading speed to ensure stability.
+                                            </p>
+                                        </div>
                                     </div>
-                                    <span class="orchestration-label" id="progressText">Starting...</span>
                                 </div>
-                                <div class="status-message" id="statusMessage"></div>
+
+                                <div class="settings-section">
+                                    <h3 class="settings-section-title" data-i18n="settings_payload">Injected Payload</h3>
+                                    <div class="settings-card">
+                                        <div class="field">
+                                            <div class="field-row">
+                                                <input type="text" id="customDllPath" placeholder="Default Amatayakul DLL" readonly>
+                                                <button class="field-btn" id="btnBrowse" data-i18n="settings_browse">Browse</button>
+                                            </div>
+                                            <p class="field-info" data-i18n="settings_payload_info">Select a custom DLL to inject into Minecraft.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="settings-footer">
+                                    <button class="btn-primary" id="btnSaveSettings" data-i18n="settings_save">Save Changes</button>
+                                    <button class="btn-ghost" id="btnResetSettings" data-i18n="settings_reset">Reset to Default</button>
+                                </div>
                             </div>
+
+                            <!-- Advanced Tab -->
+                            <div class="stab-content" id="stab-advanced">
+                                <div class="settings-section">
+                                    <h3 class="settings-section-title" data-i18n="settings_debug">Debug &amp; Development</h3>
+                                    <div class="settings-card">
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <span class="setting-label" data-i18n="settings_console_label">Debug Console</span>
+                                                <span class="setting-desc" data-i18n="settings_console_desc">Access internal logs and real-time process output.</span>
+                                            </div>
+                                            <button class="btn-primary" id="btnOpenConsole" style="flex-shrink:0;" data-i18n="btn_open">Open</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="settings-section">
+                                    <h3 class="settings-section-title" data-i18n="settings_update_checker">Update Checker</h3>
+                                    <div class="settings-card">
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <span class="setting-label" data-i18n="settings_check_mara">Check for Mara Injector</span>
+                                            </div>
+                                            <div class="toggle-switch">
+                                                <input type="checkbox" id="checkMaraUpdate" checked>
+                                                <span class="toggle-slider"></span>
+                                            </div>
+                                        </div>
+                                        <div class="setting-divider"></div>
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <span class="setting-label" data-i18n="settings_check_dll">Check for Amatayakul DLL</span>
+                                            </div>
+                                            <div class="toggle-switch">
+                                                <input type="checkbox" id="checkDllUpdate" checked>
+                                                <span class="toggle-slider"></span>
+                                            </div>
+                                        </div>
+                                        <div class="setting-divider"></div>
+                                        <div class="setting-item">
+                                            <div class="setting-info">
+                                                <span class="setting-label" data-i18n="settings_manage_versions">Manage Versions</span>
+                                                <span class="setting-desc" data-i18n="settings_manage_versions_desc">Allow switching between installed launcher versions.</span>
+                                            </div>
+                                            <div class="toggle-switch">
+                                                <input type="checkbox" id="manageVersionsToggle">
+                                                <span class="toggle-slider"></span>
+                                            </div>
+                                        </div>
+                                        <p class="field-info" data-i18n="settings_update_info" style="margin-top: 8px;">Toggle automatic updates for core components.</p>
+                                    </div>
+                                </div>
+
+                                <div class="settings-footer">
+                                    <button class="btn-primary" id="btnSaveSettingsAdv" data-i18n="settings_save">Save Changes</button>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
 
-    <!-- Settings Modal -->
-    <div class="modal-root" id="settingsModal" style="--wails-draggable:no-drag">
-        <div class="modal-backdrop"></div>
-        <div class="modal-card modal-card--tabs">
-            <div class="modal-top">
-                <div class="modal-tabs">
-                    <button class="tab-btn active" data-tab="general">General</button>
-                    <button class="tab-btn" data-tab="advanced">Advanced</button>
-                </div>
-                <button class="modal-close" id="closeSettings">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            </div>
-
-            <!-- General Tab -->
-            <div class="tab-content active" id="tab-general">
-                <div class="modal-form">
-                    <div class="field">
-                        <label data-i18n="settings_language">Language</label>
-                        <div class="field-row">
-                            <div class="custom-select" id="languageSelect">
-                                <div class="select-selected">
-                                    <span class="select-content">
-                                        <svg width="16" height="12" viewBox="0 0 16 12"><rect width="16" height="12" fill="#AA151B"/><rect y="3" width="16" height="6" fill="#F1BF00"/></svg>
-                                        <span>Español</span>
-                                    </span>
-                                    <svg class="select-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                                </div>
-                                <div class="select-items select-hide">
-                                    <div data-value="es">
-                                        <svg width="16" height="12" viewBox="0 0 16 12"><rect width="16" height="12" fill="#AA151B"/><rect y="3" width="16" height="6" fill="#F1BF00"/></svg>
-                                        <span>Español</span>
-                                    </div>
-                                    <div data-value="en">
-                                        <svg width="16" height="12" viewBox="0 0 16 12"><rect width="16" height="12" fill="#B22234"/><rect y="1.5" width="16" height="1.5" fill="#FFF"/><rect y="4.5" width="16" height="1.5" fill="#FFF"/><rect y="7.5" width="16" height="1.5" fill="#FFF"/><rect y="10.5" width="16" height="1.5" fill="#FFF"/><rect width="7" height="6.5" fill="#3C3B6E"/></svg>
-                                        <span>English</span>
-                                    </div>
-                                    <div data-value="pt">
-                                        <svg width="16" height="12" viewBox="0 0 16 12"><rect width="16" height="12" fill="#009C3B"/><polygon points="8,1 15,6 8,11 1,6" fill="#FFDF00"/><circle cx="8" cy="6" r="2.5" fill="#002776"/></svg>
-                                        <span>Português (Brasil)</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <div class="setting-item">
-                            <span class="setting-label" data-i18n="settings_auto_inject">Auto Inject</span>
-                            <div class="toggle-switch">
-                                <input type="checkbox" id="autoInjectToggle">
-                                <span class="toggle-slider"></span>
-                            </div>
-                        </div>
-                        <div id="autoInjectOptions" class="expandable-section">
-                            <div class="setting-item" style="margin-top: 15px;">
-                                <span class="setting-label" data-i18n="settings_cooldown">Injection Cooldown (s)</span>
-                                <input type="number" id="injectCooldown" value="10" min="1" max="60" style="width: 60px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 5px; border-radius: 4px; text-align: center;">
-                            </div>
-                            <p class="field-info" data-i18n="settings_cooldown_warn" style="color: #ffcc00; font-size: 0.85em; line-height: 1.4; margin-top: 10px; border-left: 2px solid #ffcc00; padding-left: 10px;">
-                                Not recommended for slower PCs, only use if your pc loads the game faster than 10 seconds, or set a custom cooldown matching your PC's loading speed to ensure stability.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label data-i18n="settings_payload">Injected Payload</label>
-                        <div class="field-row">
-                            <input type="text" id="customDllPath" placeholder="Default Amatayakul DLL" readonly>
-                            <button class="field-btn" id="btnBrowse" data-i18n="settings_browse">Browse</button>
-                        </div>
-                        <p class="field-info" data-i18n="settings_payload_info">Select a custom DLL to inject into Minecraft.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Advanced Tab -->
-            <div class="tab-content" id="tab-advanced">
-                <div class="modal-form">
-                    <div class="field">
-                        <label>Debug & Development</label>
-                        <p class="field-info">Access internal logs and real-time process output.</p>
-                        <button class="btn-primary" id="btnOpenConsole" style="margin-top: 10px;">Open Debug Console</button>
-                    </div>
-                    <div class="field field--expandable" id="updateCheckerField">
-                        <div class="field-header" id="btnExpandUpdates">
-                            <label data-i18n="settings_update_checker">Update Checker</label>
-                            <svg class="chevron" id="chevronUpdates" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                        </div>
-                        <div class="expand-content" id="updatesContent">
-                            <div class="setting-item">
-                                <span class="setting-label" data-i18n="settings_check_mara">Check for Mara Injector</span>
-                                <div class="toggle-switch">
-                                    <input type="checkbox" id="checkMaraUpdate" checked>
-                                    <span class="toggle-slider"></span>
-                                </div>
-                            </div>
-                            <div class="setting-item">
-                                <span class="setting-label" data-i18n="settings_check_dll">Check for Amatayakul DLL</span>
-                                <div class="toggle-switch">
-                                    <input type="checkbox" id="checkDllUpdate" checked>
-                                    <span class="toggle-slider"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="field-info" data-i18n="settings_update_info">Toggle automatic updates for core components.</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn-primary" id="btnSaveSettings" data-i18n="settings_save">Save Changes</button>
-                <button class="btn-ghost" id="btnResetSettings" data-i18n="settings_reset">Reset to Default</button>
-            </div>
+            </main>
         </div>
-    </div>
-
     </div>
 
     <!-- Kill Confirmation Dialog -->
@@ -322,18 +416,41 @@
         </div>
     </div>
 
+    <!-- Invalid DLL Path Modal -->
+    <div class="modal-root" id="invalidDllModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3 data-i18n="dll_error_title" style="color: #ff3333;">Invalid DLL Path</h3>
+            </div>
+            <div class="modal-form">
+                <div class="dll-error-body">
+                    <svg class="dll-error-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#ff3333" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <p class="dialog-body" data-i18n="dll_error_desc">Invalid DLL path! Please set a valid DLL and try again.</p>
+                </div>
+                <div class="field-actions">
+                    <button class="btn-primary" id="btnDllErrorSettings" data-i18n="dll_error_settings">Settings</button>
+                    <button class="btn-outline" id="btnDllErrorRetry" data-i18n="dll_error_retry">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Update Available Popup -->
     <div class="modal-root" id="updateModal" style="--wails-draggable:no-drag">
         <div class="modal-backdrop"></div>
         <div class="modal-card modal-card--compact">
             <div class="modal-top">
-                <h3>UPDATE AVAILABLE!</h3>
+                <h3 data-i18n="update_available">UPDATE AVAILABLE!</h3>
             </div>
             <div class="modal-form">
-                <p class="dialog-body">A new version (<strong id="newVersionTag">v0.0.0</strong>) of the launcher is available. Do you want to update now?</p>
+                <p class="dialog-body" data-i18n="update_desc">A new version (<strong id="newVersionTag">v0.0.0</strong>) of the launcher is available. Do you want to update now?</p>
                 <div class="field-actions field-actions--col">
-                    <button class="btn-primary" id="btnUpdateNow">Update now</button>
-                    <button class="btn-outline" id="btnUpdateLater">Update later</button>
+                    <button class="btn-primary" id="btnUpdateNow" data-i18n="btn_update_now">Update now</button>
+                    <button class="btn-outline" id="btnUpdateLater" data-i18n="btn_update_later">Update later</button>
                 </div>
             </div>
         </div>

@@ -69,3 +69,7 @@ export function SetRPCLauncher() {
 export function StartUpdate(arg1, arg2) {
   return window['go']['main']['App']['StartUpdate'](arg1, arg2);
 }
+
+export function ValidateDLLPath(arg1) {
+  return window['go']['main']['App']['ValidateDLLPath'](arg1);
+}

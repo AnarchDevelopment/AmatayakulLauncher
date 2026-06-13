@@ -8,6 +8,7 @@ export namespace main {
 	    check_mara: boolean;
 	    check_dll: boolean;
 	    skip_inject_warning: boolean;
+	    manage_versions: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppConfig(source);
@@ -22,6 +23,7 @@ export namespace main {
 	        this.check_mara = source["check_mara"];
 	        this.check_dll = source["check_dll"];
 	        this.skip_inject_warning = source["skip_inject_warning"];
+	        this.manage_versions = source["manage_versions"];
 	    }
 	}
 
