@@ -1166,7 +1166,7 @@ input:checked + .toggle-slider:before {
     max-height: 300px;
     opacity: 1;
     margin-top: 10px;
-    pointer-events: none;
+    pointer-events: auto; /* Enable interactions when active */
 }
 
 .modal-root.active .expandable-section.active {
@@ -1509,19 +1509,18 @@ input:checked + .toggle-slider:before {
 
 /* ── Settings Page Layout ────────────────────────────────── */
 .settings-layout {
-    display: flex;
+    display: grid;
+    grid-template-columns: 200px 1fr;
     gap: 32px;
     height: 100%;
-    max-width: 1100px;
+    max-width: 1000px;
     margin: 0 auto;
 }
 
 .settings-sidebar {
-    width: 220px;
     display: flex;
     flex-direction: column;
     gap: 16px;
-    flex-shrink: 0;
 }
 
 .settings-nav {
@@ -1623,7 +1622,7 @@ input:checked + .toggle-slider:before {
 }
 
 .settings-card {
-    background: var(--ind-panel);
+    background: rgba(15, 15, 15, 0.2);
     border: 1px solid var(--ind-border);
     border-radius: var(--ind-radius);
     padding: 20px;
@@ -1636,7 +1635,7 @@ input:checked + .toggle-slider:before {
 
 .settings-card:hover {
     border-color: var(--ind-metallic);
-    background: var(--ind-panel-hover);
+    background: rgba(15, 15, 15, 0.35);
 }
 
 .settings-footer {
