@@ -35,7 +35,7 @@ var assets embed.FS
 // Discord Application ID for Amatayakul Launcher
 const discordAppID = "1503246619368362094"
 
-const appVersion = "1.1.1"
+const appVersion = "1.1.2"
 
 type AppConfig struct {
 	Language             string `json:"language"`
