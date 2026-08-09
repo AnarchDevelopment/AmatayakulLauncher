@@ -9,6 +9,11 @@ export namespace main {
 	    check_dll: boolean;
 	    skip_inject_warning: boolean;
 	    manage_versions: boolean;
+	    installed_asset_version: string;
+	    tweaks_autogap: boolean;
+	    tweaks_autogap_intensity: number;
+	    tweaks_fullbright: boolean;
+	    tweaks_shaders: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new AppConfig(source);
@@ -24,6 +29,11 @@ export namespace main {
 	        this.check_dll = source["check_dll"];
 	        this.skip_inject_warning = source["skip_inject_warning"];
 	        this.manage_versions = source["manage_versions"];
+	        this.installed_asset_version = source["installed_asset_version"];
+	        this.tweaks_autogap = source["tweaks_autogap"];
+	        this.tweaks_autogap_intensity = source["tweaks_autogap_intensity"];
+	        this.tweaks_fullbright = source["tweaks_fullbright"];
+	        this.tweaks_shaders = source["tweaks_shaders"];
 	    }
 	}
 

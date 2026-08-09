@@ -13,11 +13,15 @@
     <!-- Initial Loading Splash -->
     <div class="loading-splash" id="loadingSplash">
         <div class="splash-content">
-            <h1 class="splash-logo">Amatayakul</h1>
+            <img src="amatayakul.png" alt="Amatayakul" class="splash-logo">
             <div class="splash-loader">
-                <div class="loader-line"></div>
+                <div class="loader-ring"></div>
             </div>
+            <p class="splash-status" id="splashStatus">Loading…</p>
         </div>
+        <footer class="splash-footer">
+            Anarch Development is not affiliated with Mojang or Microsoft.
+        </footer>
     </div>
 
     <div class="app-container">
@@ -68,7 +72,13 @@
                     <li>
                         <button class="sidebar-nav-item" id="navTextures" data-page="textures">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                            <span data-i18n="nav_textures">Texture Packs</span>
+                            <span data-i18n="nav_textures">Textures</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="sidebar-nav-item" id="navTweaks" data-page="tweaks">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"></path><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"></path></svg>
+                            <span data-i18n="nav_tweaks">Tweaks</span>
                         </button>
                     </li>
                     <li>
@@ -90,6 +100,9 @@
                     <div class="home-inner">
                         <div class="player-card-wrapper">
                             <div class="player-card">
+                                <div class="card-logo-container">
+                                    <img src="amatayakul.png" alt="Amatayakul" class="main-logo">
+                                </div>
                                 <div class="card-content-row">
                                     <!-- Left: Skin -->
                                     <div class="skin-section">
@@ -154,31 +167,129 @@
                     </div>
                 </div>
 
-                <!-- TEXTURE PACKS page -->
+                <!-- TEXTURES page -->
                 <div class="page" id="page-textures">
                     <div class="page-header">
-                        <h1 class="page-title" data-i18n="nav_textures">Texture Packs</h1>
+                        <h1 class="page-title" data-i18n="nav_textures">Textures</h1>
                         <p class="page-subtitle" data-i18n="textures_subtitle">Customize your Minecraft experience.</p>
                     </div>
-                    <div class="coming-soon-wrap">
-                        <div class="coming-soon-card">
-                            <div class="coming-soon-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+
+                    <div class="textures-layout">
+                        <!-- Sidebar list for imported texture packs -->
+                        <aside class="textures-sidebar">
+                            <h3 class="textures-sidebar-title" data-i18n="textures_imported_title">Imported Packs</h3>
+                            <ul class="textures-list" id="texturesList">
+                                <li class="textures-list-empty" data-i18n="textures_empty">No texture packs imported yet.</li>
+                            </ul>
+                        </aside>
+
+                        <!-- Drag and Drop area -->
+                        <div class="textures-content">
+                            <div class="drag-drop-card" id="dragDropZone">
+                                <div class="drag-drop-inner">
+                                    <div class="drag-icon-wrap">
+                                        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="drag-icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                    </div>
+                                    <h2 class="drag-title" data-i18n="drag_drop_title">Drag MCPE 0.15.10 APKs to extract texture pack from</h2>
+                                    <p class="drag-subtitle" data-i18n="drag_drop_subtitle">or click to browse files</p>
+                                    <button class="btn-primary drag-browse-btn" id="btnBrowseApk" data-i18n="settings_browse">Browse</button>
+                                </div>
+                                <input type="file" id="apkFileInput" accept=".apk" style="display: none;" />
                             </div>
-                            <h2 class="coming-soon-title" data-i18n="coming_soon_title">Coming Soon</h2>
-                            <p class="coming-soon-desc" data-i18n="coming_soon_desc">Texture pack management is on the way. Stay tuned for updates.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TWEAKS page -->
+                <div class="page" id="page-tweaks">
+                    <div class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <h1 class="page-title" data-i18n="nav_tweaks">Tweaks</h1>
+                            <p class="page-subtitle" data-i18n="tweaks_subtitle">Modify gameplay settings and options.</p>
+                        </div>
+                        <button class="btn-primary" id="btnApplyTweaks" style="display: flex; gap: 8px; align-items: center;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                            Apply Tweaks
+                        </button>
+                    </div>
+
+                    <div class="tweaks-layout">
+                        <!-- Shaders Tweak -->
+                        <div class="tweak-card">
+                            <div class="tweak-header" id="shadersHeader" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 5px 0; height: 100%;">
+                                <div class="tweak-info">
+                                    <h3 class="tweak-title" style="margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"></path></svg>
+                                        Shaders
+                                    </h3>
+                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;">Applies AnarchDevelopment shaders to the game for enhanced visuals.</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="shadersToggle">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Full Bright Tweak -->
+                        <div class="tweak-card">
+                            <div class="tweak-header" id="fullBrightHeader" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 5px 0; height: 100%;">
+                                <div class="tweak-info">
+                                    <h3 class="tweak-title" style="margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                                        Full Bright
+                                    </h3>
+                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;">Modifies the game gamma to make everything fully bright.</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="fullBrightToggle">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AutoGap Tweak -->
+                        <div class="tweak-card">
+                            <div class="tweak-header" id="autoGapHeader" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 5px 0;">
+                                <div class="tweak-info">
+                                    <h3 class="tweak-title" style="margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff3333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                                        AutoGap
+                                    </h3>
+                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;">Modifies the consumption time of golden apples.</p>
+                                </div>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="autoGapToggle">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </div>
+                            
+                            <div class="expandable-section" id="autoGapSettings">
+                                <div class="tweak-warning" style="background: rgba(255, 51, 51, 0.15); border-left: 4px solid #ff3333; padding: 12px; margin: 15px 0; border-radius: 4px; font-size: 13px; display: flex; gap: 10px; align-items: center;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff3333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                                    <span>This option is considered a <strong style="color:#ff3333;">CHEAT</strong> in most servers, and using it can cause you to get banned. Use at your own risk.</span>
+                                </div>
+                                <div class="tweak-slider-container" style="margin-top: 20px; padding: 0 10px 10px 10px;">
+                                    <div class="tweak-slider-labels" style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px;">
+                                        <span>Intensity</span>
+                                        <span id="autoGapIntensityLabel" style="font-weight: bold; color: var(--primary);">32</span>
+                                    </div>
+                                    <input type="range" id="autoGapSlider" min="0" max="32" value="32" class="custom-slider" style="width: 100%; cursor: pointer;">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- SETTINGS page -->
                 <div class="page" id="page-settings">
+                    <div class="page-header">
+                        <h1 class="page-title" data-i18n="nav_settings">Settings</h1>
+                        <p class="page-subtitle" data-i18n="settings_subtitle">Configure the launcher to your liking.</p>
+                    </div>
                     <div class="settings-layout">
                         <!-- Settings Sidebar Tabs -->
                         <div class="settings-sidebar">
-                            <div class="page-header" style="margin-bottom: 16px;">
-                                <h1 class="page-title" data-i18n="nav_settings">Settings</h1>
-                            </div>
                             <ul class="settings-nav">
                                 <li>
                                     <button class="settings-nav-item active" data-stab="general">
@@ -249,7 +360,7 @@
                                         <div id="autoInjectOptions" class="expandable-section">
                                             <div class="setting-item" style="margin-top: 15px;">
                                                 <span class="setting-label" data-i18n="settings_cooldown">Injection Cooldown (s)</span>
-                                                <input type="number" id="injectCooldown" value="10" min="1" max="60" style="width: 60px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: white; padding: 5px; border-radius: 4px; text-align: center;">
+                                                <input type="number" id="injectCooldown" value="10" min="1" max="60" class="number-input">
                                             </div>
                                             <p class="field-info" data-i18n="settings_cooldown_warn" style="color: #ffcc00; font-size: 0.85em; line-height: 1.4; margin-top: 10px; border-left: 2px solid #ffcc00; padding-left: 10px;">
                                                 Not recommended for slower PCs, only use if your pc loads the game faster than 10 seconds, or set a custom cooldown matching your PC's loading speed to ensure stability.
@@ -265,6 +376,7 @@
                                             <div class="field-row">
                                                 <input type="text" id="customDllPath" placeholder="Default Amatayakul DLL" readonly>
                                                 <button class="field-btn" id="btnBrowse" data-i18n="settings_browse">Browse</button>
+                                                <button class="field-btn" id="btnDefaultDll" data-i18n="settings_default_dll">Use Default</button>
                                             </div>
                                             <p class="field-info" data-i18n="settings_payload_info">Select a custom DLL to inject into Minecraft.</p>
                                         </div>
@@ -451,6 +563,229 @@
                 <div class="field-actions field-actions--col">
                     <button class="btn-primary" id="btnUpdateNow" data-i18n="btn_update_now">Update now</button>
                     <button class="btn-outline" id="btnUpdateLater" data-i18n="btn_update_later">Update later</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Versions – Unsupported Version Warning -->
+    <div class="modal-root" id="unsupportedVersionModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3 data-i18n="mv_unsupported_title">Unsupported Version</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body" data-i18n="mv_unsupported_body">
+                    Your installed version is not supported by Manage Versions.<br><br>
+                    <strong>Supported version:</strong><br>
+                    0.15.10<br><br>
+                    Please install the supported version before using this feature.
+                </p>
+                <div class="field-actions">
+                    <button class="btn-outline" id="btnUnsupportedOk" data-i18n="btn_ok">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Versions – Required Assets Confirmation -->
+    <div class="modal-root" id="requiredAssetsModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3 data-i18n="mv_required_title">Required Assets</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body">
+                    Do you want to download assets for version <strong id="reqAssetsVersion">0.15.10</strong>?<br><br>
+                    These assets are required for:<br>
+                    &bull; Texture Pack Management<br>
+                    &bull; Custom Game UI<br><br>
+                    Continue?
+                </p>
+                <div class="field-actions">
+                    <button class="btn-primary" id="btnReqAssetsYes" data-i18n="btn_yes">Yes</button>
+                    <button class="btn-outline" id="btnReqAssetsNo" data-i18n="btn_no">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Versions – Asset Update Dialog -->
+    <div class="modal-root" id="assetUpdateModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3 data-i18n="mv_update_title">Assets Updated</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body" data-i18n="mv_update_body">
+                    The launcher assets have been updated.<br><br>
+                    Do you want to download them now?<br><br>
+                    Your imported texture pack will be reverted to the default texture pack, and you will need to import it again.<br><br>
+                    Continue?
+                </p>
+                <div class="field-actions">
+                    <button class="btn-primary" id="btnAssetUpdateYes" data-i18n="btn_yes">Yes</button>
+                    <button class="btn-outline" id="btnAssetUpdateNo" data-i18n="btn_no">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Versions – Asset Progress Overlay -->
+    <div class="modal-root" id="assetProgressModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--progress">
+            <div class="modal-top">
+                <h3 id="assetProgressTitle">Downloading assets for 0.15.10...</h3>
+            </div>
+            <div class="modal-form" style="padding: 24px;">
+                <div class="orchestration-bar" style="margin-bottom: 12px;">
+                    <div class="orchestration-fill" id="assetProgressFill"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--muted);">
+                    <span id="assetProgressPercent">0%</span>
+                    <span id="assetProgressSpeed">0 Mbps</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 4px;">
+                    <span id="assetProgressSize">0 / 0 MB</span>
+                    <span id="assetProgressTime">--:--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Minecraft Not Installed – Install Prompt -->
+    <div class="modal-root" id="mcNotInstalledModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3 data-i18n="mc_not_installed_title">Minecraft Not Installed</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body" data-i18n="mc_not_installed_body">
+                    Minecraft 0.15.10 is not installed on this system.<br><br>
+                    Would you like to download and install the assets from GitHub?
+                </p>
+                <div class="field-actions">
+                    <button class="btn-primary" id="btnInstallMinecraft" data-i18n="btn_install">Install</button>
+                    <button class="btn-outline" id="btnCancelInstall" data-i18n="btn_later">Later</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Versions – Install Prompt -->
+    <div class="modal-root" id="assetInstallPromptModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3 data-i18n="mv_install_title">Install Assets</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body" id="assetInstallPromptText">
+                    Successfully downloaded assets for version <strong id="installPromptVersion">0.15.10</strong>.<br><br>
+                    Do you want to install them now?
+                </p>
+                <div class="field-actions">
+                    <button class="btn-primary" id="btnInstallYes" data-i18n="btn_yes">Yes</button>
+                    <button class="btn-outline" id="btnInstallNo" data-i18n="btn_no">No</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Texture Pack Options Modal -->
+    <div class="modal-root" id="textureOptionsModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3 data-i18n="texture_options_title">Import Options</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body" data-i18n="texture_options_desc">Configure how the texture pack should be imported:</p>
+                
+                <div id="textureUnmanagedWarning" style="display: none; padding: 10px; background: rgba(255,50,50,0.1); border: 1px solid rgba(255,50,50,0.3); border-radius: 8px; margin-bottom: 15px;">
+                    <p style="color: #ffcccc; font-size: 13px; margin: 0; line-height: 1.4;">
+                        <strong>Warning:</strong> Manage Versions is disabled. This will modify your official Minecraft installation. Are you sure you want to proceed?
+                    </p>
+                </div>
+
+                <div class="setting-item" id="applyCustomUIToggleContainer" style="display: none; margin-bottom: 10px;">
+                    <div class="setting-info">
+                        <span class="setting-label">Apply Amatayakul Custom UI?</span>
+                        <span class="setting-desc" style="font-size: 11px;">Downloads start_screen and title from GitHub</span>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="applyCustomUIToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </div>
+                </div>
+                
+                <div class="setting-item" style="margin-bottom: 10px;">
+                    <div class="setting-info">
+                        <span class="setting-label" data-i18n="texture_keep_main_menu">Keep Amatayakul Client main menu?</span>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="keepMainMenuToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </div>
+                </div>
+
+                <div class="setting-item" style="margin-bottom: 20px;">
+                    <div class="setting-info">
+                        <span class="setting-label" data-i18n="texture_keep_default_gui">Keep default GUI? (Crosshair and hotbar)</span>
+                    </div>
+                    <div class="toggle-switch">
+                        <input type="checkbox" id="keepDefaultGuiToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </div>
+                </div>
+
+                <div class="field-actions">
+                    <button class="btn-primary" id="btnImportTexture" data-i18n="btn_install">Install</button>
+                    <button class="btn-outline" id="btnCancelTexture" data-i18n="btn_cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Texture Pack Progress Overlay -->
+    <div class="modal-root" id="textureProgressModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--progress">
+            <div class="modal-top">
+                <h3 id="textureProgressTitle" data-i18n="texture_progress_title">Importing texture pack...</h3>
+            </div>
+            <div class="modal-form" style="padding: 24px;">
+                <div class="orchestration-bar" style="margin-bottom: 12px;">
+                    <div class="orchestration-fill" id="textureProgressFill"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; color: var(--muted);">
+                    <span id="textureProgressPercent">0%</span>
+                    <span id="textureProgressSpeed">0 MB/s</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 4px;">
+                    <span id="textureProgressSize">0 / 0 files</span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Texture Pack Error Modal -->
+    <div class="modal-root" id="textureErrorModal" style="--wails-draggable:no-drag">
+        <div class="modal-backdrop"></div>
+        <div class="modal-card modal-card--compact">
+            <div class="modal-top">
+                <h3 data-i18n="texture_error_title" style="color: #ff3333;">Error</h3>
+            </div>
+            <div class="modal-form">
+                <p class="dialog-body" id="textureErrorText" data-i18n="texture_error_desc">Invalid APK package!<br>Failed to extract assets/ folder from apk.</p>
+                <div class="field-actions">
+                    <button class="btn-outline" id="btnTextureErrorOk" data-i18n="btn_ok">OK</button>
                 </div>
             </div>
         </div>
