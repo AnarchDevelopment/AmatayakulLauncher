@@ -35,7 +35,7 @@ var assets embed.FS
 // Discord Application ID for Amatayakul Launcher
 const discordAppID = "1503246619368362094"
 
-const appVersion = "1.1.2"
+const appVersion = "1.1.21"
 
 type AppConfig struct {
 	Language             string `json:"language"`
@@ -1617,44 +1617,7 @@ func (a *App) CheckAssetsExist() bool {
 
 // ApplyAutoGap updates use_duration in items.json
 func (a *App) ApplyAutoGap(enabled bool, intensity int) map[string]interface{} {
-	assetsDir := a.getAssetsDir()
-	if assetsDir == "" {
-		return map[string]interface{}{"success": false, "error": "Assets directory not found"}
-	}
-	
-	itemsPath := filepath.Join(assetsDir, "data", "resourcepacks", "vanilla", "items.json")
-	contentBytes, err := os.ReadFile(itemsPath)
-	if err != nil {
-		return map[string]interface{}{"success": false, "error": "Failed to read items.json: " + err.Error()}
-	}
-	
-	content := string(contentBytes)
-	
-	val := 32
-	if enabled {
-		val = intensity
-	}
-	
-	// Since items.json contains comments, we use regex to replace use_duration for golden_apple and appleEnchanted
-	// Regex looks for "name": "..." and then replaces the first "use_duration": \d+ it encounters inside that object.
-	
-	targets := []string{"golden_apple", "appleEnchanted"}
-	
-	for _, target := range targets {
-		// Pattern: find "name": "target", then anything until "use_duration": (\d+)
-		// We use a lazy match to find the nearest use_duration
-		pattern := fmt.Sprintf(`("name"\s*:\s*"%s"(?:[\s\S]*?))("use_duration"\s*:\s*)\d+`, target)
-		re := regexp.MustCompile(pattern)
-		
-		content = re.ReplaceAllString(content, fmt.Sprintf(`${1}${2}%d`, val))
-	}
-	
-	err = os.WriteFile(itemsPath, []byte(content), 0644)
-	if err != nil {
-		return map[string]interface{}{"success": false, "error": "Failed to write items.json: " + err.Error()}
-	}
-	
-	return map[string]interface{}{"success": true, "needs_register": true}
+	return map[string]interface{}{"success": true, "needs_register": false}
 }
 
 // ApplyFullBright modifies the options.txt to set max gamma

@@ -209,7 +209,7 @@
                         </div>
                         <button class="btn-primary" id="btnApplyTweaks" style="display: flex; gap: 8px; align-items: center;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                            Apply Tweaks
+                            <span data-i18n="btn_apply_tweaks">Apply Tweaks</span>
                         </button>
                     </div>
 
@@ -220,9 +220,9 @@
                                 <div class="tweak-info">
                                     <h3 class="tweak-title" style="margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px;">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h4l3-9 5 18 3-9h5"></path></svg>
-                                        Shaders
+                                        <span data-i18n="tweak_shaders_title">Shaders</span>
                                     </h3>
-                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;">Applies AnarchDevelopment shaders to the game for enhanced visuals.</p>
+                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;" data-i18n="tweak_shaders_desc">Applies AnarchDevelopment shaders to the game for enhanced visuals.</p>
                                 </div>
                                 <div class="toggle-switch">
                                     <input type="checkbox" id="shadersToggle">
@@ -237,9 +237,9 @@
                                 <div class="tweak-info">
                                     <h3 class="tweak-title" style="margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px;">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                                        Full Bright
+                                        <span data-i18n="tweak_fullbright_title">Full Bright</span>
                                     </h3>
-                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;">Modifies the game gamma to make everything fully bright.</p>
+                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;" data-i18n="tweak_fullbright_desc">Modifies the game gamma to make everything fully bright.</p>
                                 </div>
                                 <div class="toggle-switch">
                                     <input type="checkbox" id="fullBrightToggle">
@@ -249,32 +249,25 @@
                         </div>
 
                         <!-- AutoGap Tweak -->
-                        <div class="tweak-card">
-                            <div class="tweak-header" id="autoGapHeader" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 5px 0;">
+                        <div class="tweak-card" style="opacity: 0.6; pointer-events: none;">
+                            <div class="tweak-header" id="autoGapHeader" style="display: flex; justify-content: space-between; align-items: center; padding: 5px 0;">
                                 <div class="tweak-info">
                                     <h3 class="tweak-title" style="margin: 0; font-size: 20px; display: flex; align-items: center; gap: 8px;">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff3333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
-                                        AutoGap
+                                        <span data-i18n="tweak_autogap_title">AutoGap</span>
                                     </h3>
-                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;">Modifies the consumption time of golden apples.</p>
+                                    <p class="tweak-desc" style="margin: 6px 0 0; color: var(--muted); font-size: 14px;" data-i18n="tweak_autogap_desc">Modifies the consumption time of golden apples.</p>
                                 </div>
                                 <div class="toggle-switch">
-                                    <input type="checkbox" id="autoGapToggle">
+                                    <input type="checkbox" id="autoGapToggle" disabled>
                                     <span class="toggle-slider"></span>
                                 </div>
                             </div>
                             
-                            <div class="expandable-section" id="autoGapSettings">
+                            <div class="expandable-section active" id="autoGapSettings" style="max-height: none;">
                                 <div class="tweak-warning" style="background: rgba(255, 51, 51, 0.15); border-left: 4px solid #ff3333; padding: 12px; margin: 15px 0; border-radius: 4px; font-size: 13px; display: flex; gap: 10px; align-items: center;">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ff3333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
-                                    <span>This option is considered a <strong style="color:#ff3333;">CHEAT</strong> in most servers, and using it can cause you to get banned. Use at your own risk.</span>
-                                </div>
-                                <div class="tweak-slider-container" style="margin-top: 20px; padding: 0 10px 10px 10px;">
-                                    <div class="tweak-slider-labels" style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px;">
-                                        <span>Intensity</span>
-                                        <span id="autoGapIntensityLabel" style="font-weight: bold; color: var(--primary);">32</span>
-                                    </div>
-                                    <input type="range" id="autoGapSlider" min="0" max="32" value="32" class="custom-slider" style="width: 100%; cursor: pointer;">
+                                    <span data-i18n="tweak_autogap_warning">This function was removed due to servers considering Amatayakul Client as a cheat.</span>
                                 </div>
                             </div>
                         </div>
