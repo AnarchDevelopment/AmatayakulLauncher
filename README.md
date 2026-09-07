@@ -7,7 +7,7 @@
 - Inyector de DLLs
 Inyecta automaticamiente DLLs al juego, siendo su principal funcion (inyectar el cliente Amatayakul https://github.com/AnarchDevelopment/AmatayakulDLL al juego)
 
-<img width="1917" height="1030" alt="image" src="https://github.com/user-attachments/assets/5d997522-874b-49d4-9683-8d5ac0a4b6c2" />
+<img width="958" height="515" alt="image" src="https://github.com/user-attachments/assets/5d997522-874b-49d4-9683-8d5ac0a4b6c2" />
 
 
 - Instalador de texturas
