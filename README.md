@@ -1,27 +1,22 @@
 ## Amatayakul Launcher
 
-Un launcher para https://github.com/AnarchDevelopment/amatayakul-client
+Amatayakul Launcher es un launcher open source con multiplas funciones, hecho para Minecraft: Windows 10 Edition Beta (Build 0.15.10.0)
 
-Por favor reportar bugs al discord abajo:
+## Funciones
 
-**Discord**: zhenrikepvp_ (Henrike)
+- Inyector de DLLs
+Inyecta automaticamiente DLLs al juego, siendo su principal funcion (inyectar el cliente Amatayakul https://github.com/AnarchDevelopment/AmatayakulDLL al juego)
 
-## Que hace al lanzar
+- Instalador de texturas
+Instala automaticamiente texturas .apk al juego.
 
-Descarga ~
-
-https://github.com/AnarchDevelopment/amatayakuldll (amatayakul.dll)
-
-https://github.com/AnarchDevelopment/MaraInjector (mara.exe)
-
-Ejecuta ~
-
-powershell.exe .\mara.exe Minecraft.Win10.DX11.exe %appdata%\AmatayakulLauncher\client-sources/amatayakul.dll
-
+- Tweaks (mejoras)
+Fullbright (deja la luz del juego siempre al maximo)
+Shaders (mejora la iluminacion del juego con shaders HLSL)
+Se planea agregar mas cosas.
 
 ## Previa
 
-<img width="1918" height="1028" alt="image" src="https://github.com/user-attachments/assets/c3a694fc-1f77-4380-bb72-75c6827663b5" />
 
 
 
